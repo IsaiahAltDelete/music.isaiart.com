@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUSIC</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <style>
+        :root {
+            --bg-blur: 20px;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --card-border: 1px solid rgba(255, 255, 255, 0.18);
+            --text-color: #ffffff;
+            --scrollbar-thumb: rgba(255, 255, 255, 0.3);
+            --scrollbar-track: rgba(0, 0, 0, 0.1);
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            overflow: hidden;
+        }
+        #bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: blur(var(--bg-blur));
+            z-index: -1;
+            transition: background-image 0.5s ease;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(4px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: var(--card-shadow);
+            border: var(--card-border);
+            width: 400px;
+            height: 600px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+        }
+        #now-playing-card {
+            order: 2;
+        }
+        #recent-tracks-card {
+            order: 1;
+        }
+        #top-tracks-card {
+            order: 3;
+        }
+        h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        .album-art-container {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        .album-art {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            animation: spin 20s linear infinite;
+            transition: transform 0.3s ease;
+        }
+        .album-art:hover {
+            transform: scale(1.05);
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+        .track-info {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 15px auto;
+            width: 80%;
+        }
+        .progress {
+            width: 30%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+        .player-controls {
+            display: flex;
+            justify-content: center;
+        }
+        .player-controls button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #ffffff;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            filter: grayscale(100%);
+        }
+        .player-controls button:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+        .track-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 450px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+        .track-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .track-list::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 4px;
+        }
+        .track-list::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 4px;
+        }
+        .track-list li {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .track-list li:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        #period-selector {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        select {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        select:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .flip-card {
+            position: relative;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            width: 100%;
+            height: 100%;
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        .flipped {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-image"></div>
+    <div class="container">
+        <div class="card" id="recent-tracks-card">
+            <h2>RECENTLY PLAYED</h2>
+            <div id="recent-tracks">
+                <!-- Recent tracks will be inserted here -->
+            </div>
+        </div>
+        <div class="card" id="now-playing-card">
+            <div class="flip-card">
+                <div class="flip-card-front">
+                    <h2>NOW PLAYING</h2>
+                    <div id="now-playing">
+                        <!-- Now playing content will be inserted here -->
+                    </div>
+                </div>
+                <div class="flip-card-back">
+                    <h2>NOW PLAYING</h2>
+                    <div id="now-playing-new">
+                        <!-- New song content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card" id="top-tracks-card">
+            <h2>TOP SONGS</h2>
+            <div id="period-selector">
+                <select id="period" onchange="displayTopTracks()">
+                    <option value="overall">Overall</option>
+                    <option value="7day">Last 7 days</option>
+                    <option value="1month">Last month</option>
+                    <option value="12month">Last 12 months</option>
+                </select>
+            </div>
+            <div id="top-tracks">
+                <!-- Top tracks will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = '7f45ea1b9ee6e3d72b49d360f990c487';
+        const USERNAME = 'Isaiart';
+        const colorThief = new ColorThief();
+        let lastAlbumArtUrl = '';
+        let currentTrack = null;
+
+        async function fetchLastfmData(method, params = {}) {
+            const queryParams = new URLSearchParams({
+                method: method,
+                user: USERNAME,
+                api_key: API_KEY,
+                format: 'json',
+                ...params
+            });
+            const url = `https://ws.audioscrobbler.com/2.0/?${queryParams}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${method}:`, error);
+                return null;
+            }
+        }
+
+        function getAlbumArtUrl(images, size = 'extralarge') {
+            const image = images.find(img => img.size === size);
+            return image ? image['#text'] : 'https://via.placeholder.com/300';
+        }
+
+        function setBackgroundImage(url) {
+            document.getElementById('bg-image').style.backgroundImage = `url(${url})`;
+        }
+
+        function formatPlayTime(timestamp) {
+            const now = new Date();
+            const playedAt = new Date(timestamp * 1000);
+            const diff = now - playedAt;
+            const minutes = Math.floor(diff / 60000);
+            if (minutes < 1) return 'Just now';
+            if (minutes === 1) return '1 minute ago';
+            if (minutes < 60) return `${minutes} minutes ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours === 1) return '1 hour ago';
+            if (hours < 24) return `${hours} hours ago`;
+            const days = Math.floor(hours / 24);
+            if (days === 1) return '1 day ago';
+            return `${days} days ago`;
+        }
+
+        function setDynamicTextColor(color) {
+            const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+            const textColor = brightness > 128 ? '#000000' : '#ffffff';
+            document.documentElement.style.setProperty('--text-color', textColor);
+        }
+
+        function createTrackHTML(track, isNowPlaying = false) {
+            const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
+            const playTime = isNowPlaying ? 'Now Playing' : formatPlayTime(track.date.uts);
+            
+            return `
+                <div class="album-art-container">
+                    <img src="${albumArtUrl}" alt="Album art" class="album-art" crossorigin="anonymous">
+                </div>
+                <div class="track-info">
+                    <strong>${track.name}</strong>
+                    <p>${track.artist['#text']}</p>
+                    <p>${track.album['#text']}</p>
+                    <p>${playTime}</p>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+                <div class="player-controls">
+                    <button>⏮️</button>
+                    <button>⏯️</button>
+                    <button>⏭️</button>
+                </div>
+            `;
+        }
+
+        async function displayNowPlaying() {
+            const data = await fetchLastfmData('user.getrecenttracks', { limit: 1 });
+            const nowPlayingSection = document.getElementById('now-playing');
+            const nowPlayingNewSection = document.getElementById('now-playing-new');
+            const flipCard = document.querySelector('.flip-card');
+            
+            if (data && data.recenttracks && data.recenttracks.track && data.recenttracks.track[0]) {
+                const track = data.recenttracks.track[0];
+                const isNowPlaying = track['@attr'] && track['@attr'].nowplaying === 'true';
+                const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
+
+                if (JSON.stringify(track) !== JSON.stringify(currentTrack)) {
+                    currentTrack = track;
+                    const newTrackHTML = createTrackHTML(track, isNowPlaying);
+
+                    if (flipCard.classList.contains('flipped')) {
+                        nowPlayingSection.innerHTML = newTrackHTML;
+                        flipCard.classList.remove('flipped');
+                    } else {
+                        nowPlayingNewSection.innerHTML = newTrackHTML;
+                        flipCard.classList.add('flipped');
+                    }
+
+                    setBackgroundImage(albumArtUrl);
+
+                    const img = flipCard.querySelector('.album-art');
+                    img.onload = function() {
+                        const color = colorThief.getColor(img);
+                        setDynamicTextColor(color);
+                    }
+                }
+            } else {
+                nowPlayingSection.innerHTML = '<p>No track currently playing</p>';
+                nowPlayingNewSection.innerHTML = '<p>No track currently playing</p>';
+            }
+        }
+
+    async function displayRecentTracks() {
+        const data = await fetchLastfmData('user.getrecenttracks', { limit: 5 });
+        const recentTracksSection = document.getElementById('recent-tracks');
+        
+        if (data && data.recenttracks && data.recenttracks.track) {
+            const recentTracks = data.recenttracks.track.slice(1);
+            const recentTracksHtml = `
+                <ul class="track-list">
+                    ${recentTracks.map(track => `
+                        <li>
+                            <strong>${track.name}</strong>
+                            <br>${track.artist['#text']}
+                            <br><small>${formatPlayTime(track.date.uts)}</small>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            recentTracksSection.innerHTML = recentTracksHtml;
+        } else {
+            recentTracksSection.innerHTML = '<p>No recent tracks found.</p>';
+        }
+    }
+
+    async function displayTopTracks() {
+        const period = document.getElementById('period').value;
+        const data = await fetchLastfmData('user.gettoptracks', { period: period, limit: 5 });
+        const topTracksSection = document.getElementById('top-tracks');
+        
+        if (data && data.toptracks && data.toptracks.track) {
+            const topTracks = data.toptracks.track;
+            const topTracksHtml = `
+                <ul class="track-list">
+                    ${topTracks.map(track => `
+                        <li>
+                            <strong>${track.name}</strong>
+                            <br>${track.artist.name}
+                            <br><small>Played ${track.playcount} times</small>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            topTracksSection.innerHTML = topTracksHtml;
+        } else {
+            topTracksSection.innerHTML = '<p>No top tracks found.</p>';
+        }
+    }
+
+    function updatePage() {
+        displayNowPlaying();
+        displayRecentTracks();
+        displayTopTracks();
+    }
+
+    // Initial page load
+    updatePage();
+
+    // Refresh data every 5 seconds
+    setInterval(updatePage, 5000);
+</script>
+</body>
+</html>
