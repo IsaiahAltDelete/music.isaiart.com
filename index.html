@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MUSIC</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <style>
         :root {
+            --bg-blur: 20px;
             --card-bg: rgba(255, 255, 255, 0.1);
             --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             --card-border: 1px solid rgba(255, 255, 255, 0.18);
@@ -22,7 +22,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-color);
             overflow: hidden;
-            background-color: #000000;
         }
         #bg-image {
             position: fixed;
@@ -32,7 +31,7 @@
             height: 100%;
             background-size: cover;
             background-position: center;
-            opacity: 0.5;
+            filter: blur(var(--bg-blur));
             z-index: -1;
             transition: background-image 0.5s ease;
         }
@@ -40,7 +39,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            align-items: start;
+            align-items: stretch;
             height: 100vh;
             padding: 20px;
             box-sizing: border-box;
@@ -48,6 +47,7 @@
         }
         .card {
             background: var(--card-bg);
+            backdrop-filter: blur(4px);
             border-radius: 15px;
             padding: 20px;
             margin: 10px;
@@ -58,11 +58,19 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             perspective: 1000px;
             overflow: hidden;
-            cursor: move;
         }
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+        }
+        #now-playing-card {
+            order: 2;
+        }
+        #recent-tracks-card {
+            order: 1;
+        }
+        #top-tracks-card {
+            order: 3;
         }
         h2 {
             margin: 0 0 15px 0;
@@ -202,7 +210,7 @@
 </head>
 <body>
     <div id="bg-image"></div>
-    <div class="container" id="card-container">
+    <div class="container">
         <div class="card" id="recent-tracks-card">
             <h2>RECENTLY PLAYED</h2>
             <div id="recent-tracks">
@@ -247,32 +255,6 @@
         const colorThief = new ColorThief();
         let lastAlbumArtUrl = '';
         let currentTrack = null;
-
-        // Initialize Sortable
-        const cardContainer = document.getElementById('card-container');
-        new Sortable(cardContainer, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            onEnd: function() {
-                // Auto-align cards after dragging
-                autoAlignCards();
-            }
-        });
-
-        function autoAlignCards() {
-            const cards = Array.from(cardContainer.children);
-            const containerWidth = cardContainer.offsetWidth;
-            const cardWidth = cards[0].offsetWidth;
-            const cardsPerRow = Math.floor(containerWidth / (cardWidth + 20)); // 20px for margins
-
-            cards.forEach((card, index) => {
-                const row = Math.floor(index / cardsPerRow);
-                const col = index % cardsPerRow;
-                card.style.position = 'absolute';
-                card.style.left = `${col * (cardWidth + 20)}px`;
-                card.style.top = `${row * (card.offsetHeight + 20)}px`;
-            });
-        }
 
         async function fetchLastfmData(method, params = {}) {
             const queryParams = new URLSearchParams({
@@ -385,72 +367,68 @@
                 }
             } else {
                 nowPlayingSection.innerHTML = '<p>No track currently playing</p>';
-nowPlayingNewSection.innerHTML = '<p>No track currently playing</p>';
+                nowPlayingNewSection.innerHTML = '<p>No track currently playing</p>';
             }
         }
 
-        async function displayRecentTracks() {
-            const data = await fetchLastfmData('user.getrecenttracks', { limit: 5 });
-            const recentTracksSection = document.getElementById('recent-tracks');
-            
-            if (data && data.recenttracks && data.recenttracks.track) {
-                const recentTracks = data.recenttracks.track.slice(1);
-                const recentTracksHtml = `
-                    <ul class="track-list">
-                        ${recentTracks.map(track => `
-                            <li>
-                                <strong>${track.name}</strong>
-                                <br>${track.artist['#text']}
-                                <br><small>${formatPlayTime(track.date.uts)}</small>
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
-                recentTracksSection.innerHTML = recentTracksHtml;
-            } else {
-                recentTracksSection.innerHTML = '<p>No recent tracks found.</p>';
-            }
+    async function displayRecentTracks() {
+        const data = await fetchLastfmData('user.getrecenttracks', { limit: 5 });
+        const recentTracksSection = document.getElementById('recent-tracks');
+        
+        if (data && data.recenttracks && data.recenttracks.track) {
+            const recentTracks = data.recenttracks.track.slice(1);
+            const recentTracksHtml = `
+                <ul class="track-list">
+                    ${recentTracks.map(track => `
+                        <li>
+                            <strong>${track.name}</strong>
+                            <br>${track.artist['#text']}
+                            <br><small>${formatPlayTime(track.date.uts)}</small>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            recentTracksSection.innerHTML = recentTracksHtml;
+        } else {
+            recentTracksSection.innerHTML = '<p>No recent tracks found.</p>';
         }
+    }
 
-        async function displayTopTracks() {
-            const period = document.getElementById('period').value;
-            const data = await fetchLastfmData('user.gettoptracks', { period: period, limit: 5 });
-            const topTracksSection = document.getElementById('top-tracks');
-            
-            if (data && data.toptracks && data.toptracks.track) {
-                const topTracks = data.toptracks.track;
-                const topTracksHtml = `
-                    <ul class="track-list">
-                        ${topTracks.map(track => `
-                            <li>
-                                <strong>${track.name}</strong>
-                                <br>${track.artist.name}
-                                <br><small>Played ${track.playcount} times</small>
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
-                topTracksSection.innerHTML = topTracksHtml;
-            } else {
-                topTracksSection.innerHTML = '<p>No top tracks found.</p>';
-            }
+    async function displayTopTracks() {
+        const period = document.getElementById('period').value;
+        const data = await fetchLastfmData('user.gettoptracks', { period: period, limit: 5 });
+        const topTracksSection = document.getElementById('top-tracks');
+        
+        if (data && data.toptracks && data.toptracks.track) {
+            const topTracks = data.toptracks.track;
+            const topTracksHtml = `
+                <ul class="track-list">
+                    ${topTracks.map(track => `
+                        <li>
+                            <strong>${track.name}</strong>
+                            <br>${track.artist.name}
+                            <br><small>Played ${track.playcount} times</small>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            topTracksSection.innerHTML = topTracksHtml;
+        } else {
+            topTracksSection.innerHTML = '<p>No top tracks found.</p>';
         }
+    }
 
-        function updatePage() {
-            displayNowPlaying();
-            displayRecentTracks();
-            displayTopTracks();
-        }
+    function updatePage() {
+        displayNowPlaying();
+        displayRecentTracks();
+        displayTopTracks();
+    }
 
-        // Initial page load
-        updatePage();
-        autoAlignCards();
+    // Initial page load
+    updatePage();
 
-        // Refresh data every 5 seconds
-        setInterval(updatePage, 5000);
-
-        // Re-align cards when window is resized
-        window.addEventListener('resize', autoAlignCards);
-    </script>
+    // Refresh data every 5 seconds
+    setInterval(updatePage, 5000);
+</script>
 </body>
 </html>
