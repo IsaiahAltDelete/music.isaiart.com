@@ -397,7 +397,7 @@
 
                     setBackgroundImage(albumArtUrl);
 
-const img = flipCard.querySelector('.album-art');
+                    const img = flipCard.querySelector('.album-art');
                     img.onload = function() {
                         const color = colorThief.getColor(img);
                         setDynamicTextColor(color);
@@ -405,7 +405,7 @@ const img = flipCard.querySelector('.album-art');
 
                     startProgressBar();
                 }
-            } else if (currentTrack) {
+} else if (currentTrack) {
                 // Keep showing the most recent track if no current track is found
                 const newTrackHTML = createTrackHTML(currentTrack, false);
                 nowPlayingSection.innerHTML = newTrackHTML;
@@ -453,7 +453,7 @@ const img = flipCard.querySelector('.album-art');
                     <ul class="track-list">
                         ${topTracks.map(track => `
                             <li>
-                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
+                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art" crossorigin="anonymous">
                                 <div>
                                     <strong>${track.name}</strong>
                                     <br>${track.artist.name}
@@ -479,7 +479,7 @@ const img = flipCard.querySelector('.album-art');
         updatePage();
 
         // Refresh data every 5 seconds
-		setInterval(updatePage, 5000);
+        setInterval(updatePage, 5000);
     </script>
 </body>
 </html>
