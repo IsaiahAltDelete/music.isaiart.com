@@ -228,7 +228,6 @@
             animation: spin 1s linear infinite;
         }
     </style>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='25' font-size='27'>⭐</text></svg>">
 </head>
 <body>
     <div id="bg-image"></div>
@@ -280,17 +279,8 @@
         let lastAlbumArtUrl = '';
         let currentTrack = null;
         let progressInterval;
-        const cache = new Map();
-        const CACHE_DURATION = 60000; // 1 minute in milliseconds
 
         async function fetchLastfmData(method, params = {}) {
-            const cacheKey = `${method}-${JSON.stringify(params)}`;
-            const cachedData = cache.get(cacheKey);
-            
-            if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
-                return cachedData.data;
-            }
-
             const queryParams = new URLSearchParams({
                 method: method,
                 user: USERNAME,
@@ -303,14 +293,9 @@
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
-                    if (response.status === 429) {
-                        throw new Error('Rate limit exceeded. Please try again later.');
-                    }
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const data = await response.json();
-                cache.set(cacheKey, { data, timestamp: Date.now() });
-                return data;
+                return await response.json();
             } catch (error) {
                 console.error(`Error fetching ${method}:`, error);
                 return null;
@@ -319,7 +304,7 @@
 
         function getAlbumArtUrl(images, size = 'extralarge') {
             const image = images.find(img => img.size === size);
-            return image && image['#text'] ? image['#text'] : 'https://via.placeholder.com/300';
+            return image ? image['#text'] : 'https://via.placeholder.com/300';
         }
 
         function setBackgroundImage(url) {
@@ -402,7 +387,7 @@
                     currentTrack = track;
                     const newTrackHTML = createTrackHTML(track, isNowPlaying);
 
- if (flipCard.classList.contains('flipped')) {
+                    if (flipCard.classList.contains('flipped')) {
                         nowPlayingSection.innerHTML = newTrackHTML;
                         flipCard.classList.remove('flipped');
                     } else {
@@ -412,7 +397,7 @@
 
                     setBackgroundImage(albumArtUrl);
 
-                    const img = flipCard.querySelector('.album-art');
+const img = flipCard.querySelector('.album-art');
                     img.onload = function() {
                         const color = colorThief.getColor(img);
                         setDynamicTextColor(color);
@@ -441,7 +426,7 @@
                     <ul class="track-list">
                         ${recentTracks.map(track => `
                             <li>
-                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art" crossorigin="anonymous" onerror="this.src='https://via.placeholder.com/40';">
+                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
                                 <div>
                                     <strong>${track.name}</strong>
                                     <br>${track.artist['#text']}
@@ -453,7 +438,7 @@
                 `;
                 recentTracksSection.innerHTML = recentTracksHtml;
             } else {
-                recentTracksSection.innerHTML = '<p>Unable to fetch recent tracks. Please try again later.</p>';
+                recentTracksSection.innerHTML = '<div class="loading"></div>';
             }
         }
 
@@ -468,7 +453,7 @@
                     <ul class="track-list">
                         ${topTracks.map(track => `
                             <li>
-                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art" crossorigin="anonymous" onerror="this.src='https://via.placeholder.com/40';">
+                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
                                 <div>
                                     <strong>${track.name}</strong>
                                     <br>${track.artist.name}
@@ -480,23 +465,21 @@
                 `;
                 topTracksSection.innerHTML = topTracksHtml;
             } else {
-                topTracksSection.innerHTML = '<p>Unable to fetch top tracks. Please try again later.</p>';
+                topTracksSection.innerHTML = '<div class="loading"></div>';
             }
         }
 
         function updatePage() {
-            Promise.all([
-                displayNowPlaying().catch(err => console.error('Error in displayNowPlaying:', err)),
-                displayRecentTracks().catch(err => console.error('Error in displayRecentTracks:', err)),
-                displayTopTracks().catch(err => console.error('Error in displayTopTracks:', err))
-            ]).catch(err => console.error('Error updating page:', err));
+            displayNowPlaying();
+            displayRecentTracks();
+            displayTopTracks();
         }
 
         // Initial page load
         updatePage();
 
-        // Refresh data every 10 seconds
-        setInterval(updatePage, 10000);
+        // Refresh data every 5 seconds
+		setInterval(updatePage, 5000);
     </script>
 </body>
 </html>
