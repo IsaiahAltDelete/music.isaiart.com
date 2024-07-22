@@ -46,7 +46,7 @@
         .card-container {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: stretch;
             gap: 20px;
         }
         .card {
@@ -61,6 +61,8 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             perspective: 1000px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         .card:hover {
             transform: translateY(-5px);
@@ -102,12 +104,14 @@
             border-radius: 2px;
             margin: 15px auto;
             width: 80%;
+            position: relative;
         }
         .progress {
-            width: 30%;
+            width: 0%;
             height: 100%;
             background: #ffffff;
             border-radius: 2px;
+            transition: width 1s linear;
         }
         .player-controls {
             display: flex;
@@ -137,8 +141,8 @@
             list-style-type: none;
             padding: 0;
             margin: 0;
-            max-height: 350px;
             overflow-y: auto;
+            flex-grow: 1;
             scrollbar-width: thin;
             scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
         }
@@ -159,10 +163,18 @@
             border-radius: 5px;
             background: rgba(255, 255, 255, 0.1);
             transition: background-color 0.3s ease, transform 0.3s ease;
+            display: flex;
+            align-items: center;
         }
         .track-list li:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: translateX(5px);
+        }
+        .track-list .mini-art {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
         }
         #period-selector {
             margin-bottom: 15px;
@@ -200,6 +212,21 @@
         .flipped {
             transform: rotateY(180deg);
         }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        .loading::after {
+            content: "";
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ffffff;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body>
@@ -209,7 +236,7 @@
             <div class="card" id="recent-tracks-card">
                 <h2>RECENTLY PLAYED</h2>
                 <div id="recent-tracks">
-                    <!-- Recent tracks will be inserted here -->
+                    <div class="loading"></div>
                 </div>
             </div>
             <div class="card" id="now-playing-card">
@@ -217,13 +244,13 @@
                     <div class="flip-card-front">
                         <h2>NOW PLAYING</h2>
                         <div id="now-playing">
-                            <!-- Now playing content will be inserted here -->
+                            <div class="loading"></div>
                         </div>
                     </div>
                     <div class="flip-card-back">
                         <h2>NOW PLAYING</h2>
                         <div id="now-playing-new">
-                            <!-- New song content will be inserted here -->
+                            <div class="loading"></div>
                         </div>
                     </div>
                 </div>
@@ -239,7 +266,7 @@
                     </select>
                 </div>
                 <div id="top-tracks">
-                    <!-- Top tracks will be inserted here -->
+                    <div class="loading"></div>
                 </div>
             </div>
         </div>
@@ -251,6 +278,7 @@
         const colorThief = new ColorThief();
         let lastAlbumArtUrl = '';
         let currentTrack = null;
+        let progressInterval;
 
         async function fetchLastfmData(method, params = {}) {
             const queryParams = new URLSearchParams({
@@ -330,6 +358,20 @@
             `;
         }
 
+        function startProgressBar() {
+            const progress = document.querySelector('#now-playing-card .progress');
+            let width = 0;
+            clearInterval(progressInterval);
+            progressInterval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(progressInterval);
+                } else {
+                    width++;
+                    progress.style.width = width + '%';
+                }
+            }, 3000); // Assuming average song length of 5 minutes (300 seconds)
+        }
+
         async function displayNowPlaying() {
             const data = await fetchLastfmData('user.getrecenttracks', { limit: 1 });
             const nowPlayingSection = document.getElementById('now-playing');
@@ -355,15 +397,22 @@
 
                     setBackgroundImage(albumArtUrl);
 
-                    const img = flipCard.querySelector('.album-art');
+const img = flipCard.querySelector('.album-art');
                     img.onload = function() {
                         const color = colorThief.getColor(img);
                         setDynamicTextColor(color);
                     }
+
+                    startProgressBar();
                 }
+            } else if (currentTrack) {
+                // Keep showing the most recent track if no current track is found
+                const newTrackHTML = createTrackHTML(currentTrack, false);
+                nowPlayingSection.innerHTML = newTrackHTML;
+                nowPlayingNewSection.innerHTML = newTrackHTML;
             } else {
-                nowPlayingSection.innerHTML = '<p>No track currently playing</p>';
-                nowPlayingNewSection.innerHTML = '<p>No track currently playing</p>';
+                nowPlayingSection.innerHTML = '<div class="loading"></div>';
+                nowPlayingNewSection.innerHTML = '<div class="loading"></div>';
             }
         }
 
@@ -377,20 +426,23 @@
                     <ul class="track-list">
                         ${recentTracks.map(track => `
                             <li>
-                                <strong>${track.name}</strong>
-                                <br>${track.artist['#text']}
-                                <br><small>${formatPlayTime(track.date.uts)}</small>
+                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
+                                <div>
+                                    <strong>${track.name}</strong>
+                                    <br>${track.artist['#text']}
+                                    <br><small>${formatPlayTime(track.date.uts)}</small>
+                                </div>
                             </li>
                         `).join('')}
                     </ul>
                 `;
                 recentTracksSection.innerHTML = recentTracksHtml;
             } else {
-                recentTracksSection.innerHTML = '<p>No recent tracks found.</p>';
+                recentTracksSection.innerHTML = '<div class="loading"></div>';
             }
         }
 
-async function displayTopTracks() {
+        async function displayTopTracks() {
             const period = document.getElementById('period').value;
             const data = await fetchLastfmData('user.gettoptracks', { period: period, limit: 5 });
             const topTracksSection = document.getElementById('top-tracks');
@@ -401,16 +453,19 @@ async function displayTopTracks() {
                     <ul class="track-list">
                         ${topTracks.map(track => `
                             <li>
-                                <strong>${track.name}</strong>
-                                <br>${track.artist.name}
-                                <br><small>Played ${track.playcount} times</small>
+                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
+                                <div>
+                                    <strong>${track.name}</strong>
+                                    <br>${track.artist.name}
+                                    <br><small>Played ${track.playcount} times</small>
+                                </div>
                             </li>
                         `).join('')}
                     </ul>
                 `;
                 topTracksSection.innerHTML = topTracksHtml;
             } else {
-                topTracksSection.innerHTML = '<p>No top tracks found.</p>';
+                topTracksSection.innerHTML = '<div class="loading"></div>';
             }
         }
 
@@ -423,8 +478,8 @@ async function displayTopTracks() {
         // Initial page load
         updatePage();
 
-        // Refresh data every 5 seconds
-        setInterval(updatePage, 5000);
+        // Refresh data every 30 seconds
+        setInterval(updatePage, 30000);
     </script>
 </body>
 </html>
