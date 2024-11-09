@@ -17,7 +17,7 @@
             --transition-speed: 0.3s;
         }
 
-        /* Reset and base styles */
+        /* Reset and Base Styles */
         *, *::before, *::after {
             box-sizing: border-box;
         }
@@ -393,7 +393,7 @@
     </div>
 
     <script>
-        const API_KEY = '${API_KEY}';
+        const API_KEY = '${API_KEY}'; // Replace '${API_KEY}' with your actual API key
         const USERNAME = 'Isaiart';
         const colorThief = new ColorThief();
         let lastAlbumArtUrl = '';
@@ -428,7 +428,8 @@
         }
 
         function setBackgroundImage(url) {
-            document.getElementById('bg-image').style.backgroundImage = `url(${url})`;
+            const bgImageDiv = document.getElementById('bg-image');
+            bgImageDiv.style.backgroundImage = `url(${url})`;
         }
 
         function formatPlayTime(timestamp) {
@@ -547,7 +548,7 @@
             const recentTracksSection = document.getElementById('recent-tracks');
             
             if (data && data.recenttracks && data.recenttracks.track) {
-                const recentTracks = data.recenttracks.track.slice(1);
+                const recentTracks = data.recenttracks.track.slice(1); // Exclude the currently playing track
                 const recentTracksHtml = `
                     <ul class="track-list">
                         ${recentTracks.map(track => `
