@@ -14,15 +14,25 @@
             --text-color: #ffffff;
             --scrollbar-thumb: rgba(255, 255, 255, 0.3);
             --scrollbar-track: rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
         }
+
+        /* Reset and base styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-color);
-            overflow: hidden;
+            overflow-x: hidden;
+            background-color: #000; /* Fallback background */
         }
+
+        /* Background Image */
         #bg-image {
             position: fixed;
             top: -5%;
@@ -35,20 +45,29 @@
             z-index: -1;
             transition: background-image 0.5s ease;
         }
+
+        /* Container */
         .container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
         }
+
+        /* Card Container */
         .card-container {
             display: flex;
             justify-content: center;
             align-items: stretch;
             gap: 20px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
         }
+
+        /* Card Styles */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(4px);
@@ -56,48 +75,63 @@
             padding: 20px;
             box-shadow: var(--card-shadow);
             border: var(--card-border);
-            width: 300px;
-            height: 500px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            flex: 1 1 300px;
+            max-width: 100%;
+            min-width: 280px;
+            height: auto;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
             perspective: 1000px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
         }
+
+        /* Heading Styles */
         h2 {
             margin: 0 0 15px 0;
-            font-size: 1.2em;
+            font-size: 1.5em;
             text-align: center;
         }
+
+        /* Album Art Container */
         .album-art-container {
-            width: 200px;
-            height: 200px;
+            width: 100%;
+            max-width: 200px;
+            height: auto;
             margin: 0 auto 20px;
             position: relative;
         }
+
         .album-art {
             width: 100%;
-            height: 100%;
+            height: auto;
             object-fit: cover;
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
             animation: spin 20s linear infinite;
-            transition: transform 0.3s ease;
+            transition: transform var(--transition-speed) ease;
         }
+
         .album-art:hover {
             transform: scale(1.05);
         }
+
         @keyframes spin {
             100% { transform: rotate(360deg); }
         }
+
+        /* Track Info */
         .track-info {
             text-align: center;
             margin-bottom: 15px;
         }
+
+        /* Progress Bar */
         .progress-bar {
             height: 4px;
             background: rgba(255, 255, 255, 0.2);
@@ -106,6 +140,7 @@
             width: 80%;
             position: relative;
         }
+
         .progress {
             width: 0%;
             height: 100%;
@@ -113,10 +148,14 @@
             border-radius: 2px;
             transition: width 1s linear;
         }
+
+        /* Player Controls */
         .player-controls {
             display: flex;
             justify-content: center;
+            margin-top: auto;
         }
+
         .player-controls button {
             background: rgba(255, 255, 255, 0.2);
             border: none;
@@ -130,13 +169,16 @@
             justify-content: center;
             font-size: 18px;
             color: #ffffff;
-            transition: background-color 0.3s ease, transform 0.3s ease;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
             filter: grayscale(100%);
         }
+
         .player-controls button:hover {
             background: rgba(255, 255, 255, 0.4);
             transform: scale(1.1);
         }
+
+        /* Track List */
         .track-list {
             list-style-type: none;
             padding: 0;
@@ -146,53 +188,66 @@
             scrollbar-width: thin;
             scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
         }
+
         .track-list::-webkit-scrollbar {
             width: 8px;
         }
+
         .track-list::-webkit-scrollbar-track {
             background: var(--scrollbar-track);
             border-radius: 4px;
         }
+
         .track-list::-webkit-scrollbar-thumb {
             background-color: var(--scrollbar-thumb);
             border-radius: 4px;
         }
+
         .track-list li {
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 5px;
             background: rgba(255, 255, 255, 0.1);
-            transition: background-color 0.3s ease, transform 0.3s ease;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
             display: flex;
             align-items: center;
         }
+
         .track-list li:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: translateX(5px);
         }
+
         .track-list .mini-art {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             margin-right: 10px;
+            flex-shrink: 0;
         }
+
+        /* Period Selector */
         #period-selector {
             margin-bottom: 15px;
             text-align: center;
         }
+
         select {
             padding: 5px 10px;
             border-radius: 5px;
             border: none;
             background: rgba(255, 255, 255, 0.2);
             color: #ffffff;
-            font-size: 0.9em;
+            font-size: 1em;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color var(--transition-speed) ease;
         }
+
         select:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
+        /* Flip Card */
         .flip-card {
             position: relative;
             transition: transform 0.8s;
@@ -200,24 +255,32 @@
             width: 100%;
             height: 100%;
         }
+
         .flip-card-front, .flip-card-back {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
+            top: 0;
+            left: 0;
         }
+
         .flip-card-back {
             transform: rotateY(180deg);
         }
+
         .flipped {
             transform: rotateY(180deg);
         }
+
+        /* Loading Spinner */
         .loading {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100%;
         }
+
         .loading::after {
             content: "";
             width: 40px;
@@ -226,6 +289,63 @@
             border-top: 4px solid transparent;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1200px) {
+            .card {
+                flex: 1 1 45%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .card {
+                flex: 1 1 100%;
+                max-width: 500px;
+            }
+
+            .album-art-container {
+                max-width: 150px;
+            }
+
+            h2 {
+                font-size: 1.3em;
+            }
+
+            select {
+                font-size: 0.95em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .album-art-container {
+                max-width: 120px;
+            }
+
+            .track-list .mini-art {
+                width: 35px;
+                height: 35px;
+            }
+
+            .player-controls button {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+                margin: 0 8px;
+            }
+
+            h2 {
+                font-size: 1.1em;
+            }
+
+            select {
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
@@ -304,7 +424,7 @@
 
         function getAlbumArtUrl(images, size = 'extralarge') {
             const image = images.find(img => img.size === size);
-            return image ? image['#text'] : 'https://via.placeholder.com/300';
+            return image && image['#text'] ? image['#text'] : 'https://via.placeholder.com/300';
         }
 
         function setBackgroundImage(url) {
@@ -312,6 +432,7 @@
         }
 
         function formatPlayTime(timestamp) {
+            if (!timestamp) return 'Unknown';
             const now = new Date();
             const playedAt = new Date(timestamp * 1000);
             const diff = now - playedAt;
@@ -335,7 +456,7 @@
 
         function createTrackHTML(track, isNowPlaying = false) {
             const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
-            const playTime = isNowPlaying ? 'Now Playing' : formatPlayTime(track.date.uts);
+            const playTime = isNowPlaying ? 'Now Playing' : formatPlayTime(track.date ? track.date.uts : null);
             
             return `
                 <div class="album-art-container">
@@ -369,7 +490,7 @@
                     width++;
                     progress.style.width = width + '%';
                 }
-            }, 3000); // Assuming average song length of 5 minutes (300 seconds)
+            }, 3000); // Adjust as needed
         }
 
         async function displayNowPlaying() {
@@ -397,10 +518,15 @@
 
                     setBackgroundImage(albumArtUrl);
 
-const img = flipCard.querySelector('.album-art');
-                    img.onload = function() {
+                    const img = flipCard.querySelector('.album-art');
+                    if (img.complete) {
                         const color = colorThief.getColor(img);
                         setDynamicTextColor(color);
+                    } else {
+                        img.addEventListener('load', function() {
+                            const color = colorThief.getColor(img);
+                            setDynamicTextColor(color);
+                        });
                     }
 
                     startProgressBar();
@@ -430,7 +556,7 @@ const img = flipCard.querySelector('.album-art');
                                 <div>
                                     <strong>${track.name}</strong>
                                     <br>${track.artist['#text']}
-                                    <br><small>${formatPlayTime(track.date.uts)}</small>
+                                    <br><small>${formatPlayTime(track.date ? track.date.uts : null)}</small>
                                 </div>
                             </li>
                         `).join('')}
@@ -479,7 +605,7 @@ const img = flipCard.querySelector('.album-art');
         updatePage();
 
         // Refresh data every 10 seconds
-		setInterval(updatePage, 10000);
+        setInterval(updatePage, 10000);
     </script>
 </body>
 </html>
