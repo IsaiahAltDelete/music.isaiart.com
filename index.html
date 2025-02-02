@@ -8,10 +8,11 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <!-- Google Font for content -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Color Thief Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
   <style>
     :root {
-      /* Spotify-inspired palette */
+      /* Spotify-inspired palette with white text */
       --primary-bg: #121212;
       --secondary-bg: #181818;
       --card-bg: rgba(25, 25, 25, 0.95);
@@ -36,7 +37,7 @@
       overflow: hidden;
     }
     
-    /* Blurred background image */
+    /* Blurred Background Image */
     #bg-image {
       position: fixed;
       top: 0;
@@ -51,7 +52,7 @@
       transition: background-image 0.5s ease;
     }
     
-    /* Main layout container */
+    /* Main Layout Container */
     .main-container {
       display: flex;
       height: 100vh;
@@ -69,7 +70,6 @@
       text-align: center;
       position: relative;
     }
-    
     .album-art-container {
       width: 300px;
       height: 300px;
@@ -90,7 +90,6 @@
     @keyframes spin {
       100% { transform: rotate(360deg); }
     }
-    
     .track-info {
       margin-bottom: 20px;
     }
@@ -103,7 +102,6 @@
       color: var(--subtext-color);
       font-weight: 400;
     }
-    
     .progress-bar {
       width: 80%;
       height: 6px;
@@ -118,7 +116,6 @@
       background: var(--accent-color);
       transition: width 1s linear;
     }
-    
     .player-controls {
       display: flex;
       gap: 20px;
@@ -144,37 +141,63 @@
       transform: scale(1.1);
     }
     
-    /* Sidebar with multiple sections */
+    /* Sidebar with Tab Navigation */
     .sidebar {
       flex: 2;
       background: var(--card-bg);
-      overflow-y: auto;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
     }
-    .sidebar-section {
-      margin-bottom: 30px;
+    .tab-nav {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 10px;
     }
-    .sidebar-section header {
+    .tab-nav button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--subtext-color);
+      font-size: 28px;
+      transition: color var(--transition-speed) ease;
+    }
+    .tab-nav button.active {
+      color: var(--accent-color);
+    }
+    
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      display: none;
+    }
+    .tab-content.active {
+      opacity: 1;
+      transform: translateX(0);
+      display: block;
+    }
+    
+    /* Header inside each Tab Content (for interval controls) */
+    .tab-content header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
       padding-bottom: 5px;
       margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
-    .sidebar-section header h2 {
+    .tab-content header h2 {
       font-size: 1.4em;
       margin: 0;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .sidebar-section header .controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .sidebar-section header select {
+    .tab-content header select {
       padding: 4px;
       border-radius: var(--border-radius);
       border: none;
@@ -182,6 +205,8 @@
       color: var(--text-color);
       font-size: 0.9em;
     }
+    
+    /* Pagination Controls */
     .pagination {
       display: flex;
       justify-content: flex-end;
@@ -205,6 +230,9 @@
     }
     .pagination button:hover {
       background: var(--accent-color);
+    }
+    .pagination span {
+      font-size: 1em;
     }
     
     .track-list {
@@ -242,7 +270,7 @@
       color: var(--subtext-color);
     }
     
-    /* Responsive adjustments */
+    /* Responsive Adjustments */
     @media (max-width: 900px) {
       .main-container {
         flex-direction: column;
@@ -253,6 +281,9 @@
       .sidebar {
         flex: none;
         height: 50vh;
+      }
+      .tab-nav button {
+        font-size: 24px;
       }
     }
   </style>
@@ -279,20 +310,25 @@
       </div>
     </div>
     
-    <!-- Sidebar for Top Sections and Recently Played -->
+    <!-- Sidebar with Tab Navigation -->
     <div class="sidebar">
-      <!-- Top Songs Section -->
-      <div class="sidebar-section" id="top-songs-section">
+      <div class="tab-nav">
+        <button id="tab-songs-btn" class="active" title="Top Songs"><i class="material-icons">music_note</i></button>
+        <button id="tab-artists-btn" title="Top Artists"><i class="material-icons">person</i></button>
+        <button id="tab-albums-btn" title="Top Albums"><i class="material-icons">album</i></button>
+        <button id="tab-recent-btn" title="Recently Played"><i class="material-icons">history</i></button>
+      </div>
+      
+      <!-- Tab Content for Top Songs -->
+      <div id="tab-songs" class="tab-content active">
         <header>
-          <h2><i class="material-icons">music_note</i> Top Songs</h2>
-          <div class="controls">
-            <select id="top-songs-interval">
-              <option value="overall">Overall</option>
-              <option value="7day">7 Day</option>
-              <option value="1month" selected>1 Month</option>
-              <option value="12month">12 Month</option>
-            </select>
-          </div>
+          <h2>Top Songs</h2>
+          <select id="top-songs-interval">
+            <option value="overall">Overall</option>
+            <option value="7day">7 Day</option>
+            <option value="1month" selected>1 Month</option>
+            <option value="12month">12 Month</option>
+          </select>
         </header>
         <ul class="track-list" id="top-songs-list">
           <li>Loading...</li>
@@ -304,18 +340,16 @@
         </div>
       </div>
       
-      <!-- Top Artists Section -->
-      <div class="sidebar-section" id="top-artists-section">
+      <!-- Tab Content for Top Artists -->
+      <div id="tab-artists" class="tab-content">
         <header>
-          <h2><i class="material-icons">person</i> Top Artists</h2>
-          <div class="controls">
-            <select id="top-artists-interval">
-              <option value="overall">Overall</option>
-              <option value="7day">7 Day</option>
-              <option value="1month" selected>1 Month</option>
-              <option value="12month">12 Month</option>
-            </select>
-          </div>
+          <h2>Top Artists</h2>
+          <select id="top-artists-interval">
+            <option value="overall">Overall</option>
+            <option value="7day">7 Day</option>
+            <option value="1month" selected>1 Month</option>
+            <option value="12month">12 Month</option>
+          </select>
         </header>
         <ul class="track-list" id="top-artists-list">
           <li>Loading...</li>
@@ -327,18 +361,16 @@
         </div>
       </div>
       
-      <!-- Top Albums Section -->
-      <div class="sidebar-section" id="top-albums-section">
+      <!-- Tab Content for Top Albums -->
+      <div id="tab-albums" class="tab-content">
         <header>
-          <h2><i class="material-icons">album</i> Top Albums</h2>
-          <div class="controls">
-            <select id="top-albums-interval">
-              <option value="overall">Overall</option>
-              <option value="7day">7 Day</option>
-              <option value="1month" selected>1 Month</option>
-              <option value="12month">12 Month</option>
-            </select>
-          </div>
+          <h2>Top Albums</h2>
+          <select id="top-albums-interval">
+            <option value="overall">Overall</option>
+            <option value="7day">7 Day</option>
+            <option value="1month" selected>1 Month</option>
+            <option value="12month">12 Month</option>
+          </select>
         </header>
         <ul class="track-list" id="top-albums-list">
           <li>Loading...</li>
@@ -350,10 +382,10 @@
         </div>
       </div>
       
-      <!-- Recently Played Section -->
-      <div class="sidebar-section" id="recent-section">
+      <!-- Tab Content for Recently Played -->
+      <div id="tab-recent" class="tab-content">
         <header>
-          <h2><i class="material-icons">history</i> Recently Played</h2>
+          <h2>Recently Played</h2>
         </header>
         <ul class="track-list" id="recent-tracks-list">
           <li>Loading...</li>
@@ -446,8 +478,10 @@
       }
     }
     
-    // Create HTML for a track list item (used for top songs and recently played)
+    // Create HTML for a track list item.
+    // For top songs, if available, use the track’s album art cover.
     function createTrackListItem(track, extraInfo = '') {
+      // Use the image provided by the track object; if empty, the placeholder is used.
       const albumArtUrl = getAlbumArtUrl(track.image, 'small');
       const playTime = track.date ? formatPlayTime(track.date.uts) : '';
       return `
@@ -461,7 +495,7 @@
       `;
     }
     
-    // Create HTML for an artist list item
+    // Create HTML for an artist list item.
     function createArtistListItem(artist) {
       return `
         <li>
@@ -473,7 +507,7 @@
       `;
     }
     
-    // Create HTML for an album list item
+    // Create HTML for an album list item.
     function createAlbumListItem(album) {
       const albumArtUrl = album.image && album.image.length ? getAlbumArtUrl(album.image, 'extralarge') : 'https://via.placeholder.com/300';
       return `
@@ -595,20 +629,48 @@
     document.getElementById('top-songs-next').addEventListener('click', () => {
       topSongsPage++; displayTopSongs();
     });
-    
     document.getElementById('top-artists-prev').addEventListener('click', () => {
       if(topArtistsPage > 1) { topArtistsPage--; displayTopArtists(); }
     });
     document.getElementById('top-artists-next').addEventListener('click', () => {
       topArtistsPage++; displayTopArtists();
     });
-    
     document.getElementById('top-albums-prev').addEventListener('click', () => {
       if(topAlbumsPage > 1) { topAlbumsPage--; displayTopAlbums(); }
     });
     document.getElementById('top-albums-next').addEventListener('click', () => {
       topAlbumsPage++; displayTopAlbums();
     });
+    
+    // Tab Navigation
+    const tabs = {
+      songs: document.getElementById('tab-songs'),
+      artists: document.getElementById('tab-artists'),
+      albums: document.getElementById('tab-albums'),
+      recent: document.getElementById('tab-recent')
+    };
+    const tabButtons = {
+      songs: document.getElementById('tab-songs-btn'),
+      artists: document.getElementById('tab-artists-btn'),
+      albums: document.getElementById('tab-albums-btn'),
+      recent: document.getElementById('tab-recent-btn')
+    };
+    
+    function switchTab(tabName) {
+      // Remove "active" class from all tab content and buttons.
+      Object.values(tabs).forEach(tab => tab.classList.remove('active'));
+      Object.values(tabButtons).forEach(btn => btn.classList.remove('active'));
+      
+      // Activate the selected tab.
+      tabs[tabName].classList.add('active');
+      tabButtons[tabName].classList.add('active');
+    }
+    
+    // Attach event listeners to tab buttons.
+    tabButtons.songs.addEventListener('click', () => switchTab('songs'));
+    tabButtons.artists.addEventListener('click', () => switchTab('artists'));
+    tabButtons.albums.addEventListener('click', () => switchTab('albums'));
+    tabButtons.recent.addEventListener('click', () => switchTab('recent'));
     
     // Initial load and update every 10 seconds.
     updatePage();
