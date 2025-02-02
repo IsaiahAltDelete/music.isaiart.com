@@ -1,612 +1,575 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUSIC</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <style>
-        :root {
-            --bg-blur: 20px;
-            --card-bg: rgba(255, 255, 255, 0.1);
-            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            --card-border: 1px solid rgba(255, 255, 255, 0.18);
-            --text-color: #ffffff;
-            --scrollbar-thumb: rgba(255, 255, 255, 0.3);
-            --scrollbar-track: rgba(0, 0, 0, 0.1);
-            --transition-speed: 0.3s;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUSIC</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+  <!-- You can replace this font import with your own if you have access to Spotify's font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Spotify-inspired color palette */
+      --primary-bg: #121212;
+      --secondary-bg: #181818;
+      --card-bg: rgba(25, 25, 25, 0.9);
+      --accent-color: #1DB954;
+      --text-color: #FFFFFF;
+      --subtext-color: #B3B3B3;
+      --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
+      --transition-speed: 0.3s;
+      --border-radius: 10px;
+    }
 
-        /* Reset and Base Styles */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
+    /* Reset and Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+      background-color: var(--primary-bg);
+      color: var(--text-color);
+      overflow-x: hidden;
+    }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-color);
-            overflow-x: hidden;
-            background-color: #000; /* Fallback background */
-        }
+    /* Background Image */
+    #bg-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      filter: blur(25px);
+      opacity: 0.3;
+      z-index: -1;
+      transition: background-image 0.5s ease;
+    }
 
-        /* Background Image */
-        #bg-image {
-            position: fixed;
-            top: -5%;
-            left: -5%;
-            width: 110%;
-            height: 110%;
-            background-size: cover;
-            background-position: center;
-            filter: blur(var(--bg-blur));
-            z-index: -1;
-            transition: background-image 0.5s ease;
-        }
+    /* Container */
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
-        /* Container */
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+    /* Card Container */
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+    }
 
-        /* Card Container */
-        .card-container {
-            display: flex;
-            justify-content: center;
-            align-items: stretch;
-            gap: 20px;
-            flex-wrap: wrap;
-            width: 100%;
-            max-width: 1200px;
-        }
+    /* Card Styles */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      flex: 1 1 300px;
+      min-width: 280px;
+      transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+    }
 
-        /* Card Styles */
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(4px);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-            border: var(--card-border);
-            flex: 1 1 300px;
-            max-width: 100%;
-            min-width: 280px;
-            height: auto;
-            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
-            perspective: 1000px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+    /* Headings */
+    h2 {
+      margin: 0 0 15px;
+      font-size: 1.5em;
+      text-align: center;
+    }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
-        }
+    /* Album Art Container */
+    .album-art-container {
+      width: 100%;
+      max-width: 200px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .album-art {
+      width: 100%;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      animation: spin 20s linear infinite;
+      transition: transform var(--transition-speed) ease;
+    }
+    .album-art:hover {
+      transform: scale(1.05);
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
 
-        /* Heading Styles */
-        h2 {
-            margin: 0 0 15px 0;
-            font-size: 1.5em;
-            text-align: center;
-        }
+    /* Track Info */
+    .track-info {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .track-info strong {
+      font-size: 1.1em;
+    }
+    .track-info p {
+      margin: 5px 0;
+      color: var(--subtext-color);
+    }
 
-        /* Album Art Container */
-        .album-art-container {
-            width: 100%;
-            max-width: 200px;
-            height: auto;
-            margin: 0 auto 20px;
-            position: relative;
-        }
+    /* Progress Bar */
+    .progress-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 15px auto;
+      width: 80%;
+      position: relative;
+    }
+    .progress {
+      width: 0%;
+      height: 100%;
+      background: var(--accent-color);
+      border-radius: 2px;
+      transition: width 1s linear;
+    }
 
-        .album-art {
-            width: 100%;
-            height: auto;
-            object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            animation: spin 20s linear infinite;
-            transition: transform var(--transition-speed) ease;
-        }
+    /* Player Controls */
+    .player-controls {
+      display: flex;
+      justify-content: center;
+      margin-top: auto;
+    }
+    .player-controls button {
+      background: var(--secondary-bg);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin: 0 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--text-color);
+      transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+    }
+    .player-controls button:hover {
+      background: var(--accent-color);
+      transform: scale(1.1);
+    }
 
-        .album-art:hover {
-            transform: scale(1.05);
-        }
+    /* Track List */
+    .track-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      overflow-y: auto;
+      flex-grow: 1;
+      max-height: 300px;
+    }
+    .track-list li {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      background: var(--secondary-bg);
+      transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+      display: flex;
+      align-items: center;
+    }
+    .track-list li:hover {
+      background: var(--accent-color);
+      transform: translateX(5px);
+    }
+    .track-list .mini-art {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .track-list li div {
+      display: flex;
+      flex-direction: column;
+    }
+    .track-list li strong {
+      font-size: 1em;
+    }
+    .track-list li small {
+      color: var(--subtext-color);
+    }
 
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
+    /* Period Selector */
+    #period-selector {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    select {
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      border: none;
+      background: var(--secondary-bg);
+      color: var(--text-color);
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color var(--transition-speed) ease;
+    }
+    select:hover {
+      background: var(--accent-color);
+    }
 
-        /* Track Info */
-        .track-info {
-            text-align: center;
-            margin-bottom: 15px;
-        }
+    /* Flip Card */
+    .flip-card {
+      position: relative;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+      width: 100%;
+      height: 100%;
+    }
+    .flip-card-front,
+    .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      top: 0;
+      left: 0;
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+    .flipped {
+      transform: rotateY(180deg);
+    }
 
-        /* Progress Bar */
-        .progress-bar {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            margin: 15px auto;
-            width: 80%;
-            position: relative;
-        }
+    /* Loading Spinner */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    .loading::after {
+      content: "";
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--accent-color);
+      border-top: 4px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
 
-        .progress {
-            width: 0%;
-            height: 100%;
-            background: #ffffff;
-            border-radius: 2px;
-            transition: width 1s linear;
-        }
-
-        /* Player Controls */
-        .player-controls {
-            display: flex;
-            justify-content: center;
-            margin-top: auto;
-        }
-
-        .player-controls button {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin: 0 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #ffffff;
-            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
-            filter: grayscale(100%);
-        }
-
-        .player-controls button:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(1.1);
-        }
-
-        /* Track List */
-        .track-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            overflow-y: auto;
-            flex-grow: 1;
-            scrollbar-width: thin;
-            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-        }
-
-        .track-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .track-list::-webkit-scrollbar-track {
-            background: var(--scrollbar-track);
-            border-radius: 4px;
-        }
-
-        .track-list::-webkit-scrollbar-thumb {
-            background-color: var(--scrollbar-thumb);
-            border-radius: 4px;
-        }
-
-        .track-list li {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
-            display: flex;
-            align-items: center;
-        }
-
-        .track-list li:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(5px);
-        }
-
-        .track-list .mini-art {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-            flex-shrink: 0;
-        }
-
-        /* Period Selector */
-        #period-selector {
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        select {
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: none;
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color var(--transition-speed) ease;
-        }
-
-        select:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Flip Card */
-        .flip-card {
-            position: relative;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
-            width: 100%;
-            height: 100%;
-        }
-
-        .flip-card-front, .flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            top: 0;
-            left: 0;
-        }
-
-        .flip-card-back {
-            transform: rotateY(180deg);
-        }
-
-        .flipped {
-            transform: rotateY(180deg);
-        }
-
-        /* Loading Spinner */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-        }
-
-        .loading::after {
-            content: "";
-            width: 40px;
-            height: 40px;
-            border: 4px solid #ffffff;
-            border-top: 4px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 1200px) {
-            .card {
-                flex: 1 1 45%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .card-container {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .card {
-                flex: 1 1 100%;
-                max-width: 500px;
-            }
-
-            .album-art-container {
-                max-width: 150px;
-            }
-
-            h2 {
-                font-size: 1.3em;
-            }
-
-            select {
-                font-size: 0.95em;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .album-art-container {
-                max-width: 120px;
-            }
-
-            .track-list .mini-art {
-                width: 35px;
-                height: 35px;
-            }
-
-            .player-controls button {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
-                margin: 0 8px;
-            }
-
-            h2 {
-                font-size: 1.1em;
-            }
-
-            select {
-                font-size: 0.9em;
-            }
-        }
-    </style>
+    /* Responsive Adjustments */
+    @media (max-width: 1200px) {
+      .card {
+        flex: 1 1 45%;
+      }
+    }
+    @media (max-width: 768px) {
+      .card-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .card {
+        flex: 1 1 100%;
+        max-width: 500px;
+      }
+      .album-art-container {
+        max-width: 150px;
+      }
+      h2 {
+        font-size: 1.3em;
+      }
+      select {
+        font-size: 0.95em;
+      }
+    }
+    @media (max-width: 480px) {
+      .album-art-container {
+        max-width: 120px;
+      }
+      .track-list .mini-art {
+        width: 35px;
+        height: 35px;
+      }
+      .player-controls button {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+        margin: 0 8px;
+      }
+      h2 {
+        font-size: 1.1em;
+      }
+      select {
+        font-size: 0.9em;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="bg-image"></div>
-    <div class="container">
-        <div class="card-container">
-            <div class="card" id="recent-tracks-card">
-                <h2>RECENTLY PLAYED</h2>
-                <div id="recent-tracks">
-                    <div class="loading"></div>
-                </div>
-            </div>
-            <div class="card" id="now-playing-card">
-                <div class="flip-card">
-                    <div class="flip-card-front">
-                        <h2>NOW PLAYING</h2>
-                        <div id="now-playing">
-                            <div class="loading"></div>
-                        </div>
-                    </div>
-                    <div class="flip-card-back">
-                        <h2>NOW PLAYING</h2>
-                        <div id="now-playing-new">
-                            <div class="loading"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card" id="top-tracks-card">
-                <h2>TOP SONGS</h2>
-                <div id="period-selector">
-                    <select id="period" onchange="displayTopTracks()">
-                        <option value="overall">Overall</option>
-                        <option value="7day">Last 7 days</option>
-                        <option value="1month">Last month</option>
-                        <option value="12month">Last 12 months</option>
-                    </select>
-                </div>
-                <div id="top-tracks">
-                    <div class="loading"></div>
-                </div>
-            </div>
+  <div id="bg-image"></div>
+  <div class="container">
+    <div class="card-container">
+      <!-- Recently Played Card -->
+      <div class="card" id="recent-tracks-card">
+        <h2>RECENTLY PLAYED</h2>
+        <div id="recent-tracks">
+          <div class="loading"></div>
         </div>
+      </div>
+
+      <!-- Now Playing Card with Flip Animation -->
+      <div class="card" id="now-playing-card">
+        <div class="flip-card">
+          <div class="flip-card-front">
+            <h2>NOW PLAYING</h2>
+            <div id="now-playing">
+              <div class="loading"></div>
+            </div>
+          </div>
+          <div class="flip-card-back">
+            <h2>NOW PLAYING</h2>
+            <div id="now-playing-new">
+              <div class="loading"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Songs Card -->
+      <div class="card" id="top-tracks-card">
+        <h2>TOP SONGS</h2>
+        <div id="period-selector">
+          <select id="period" onchange="displayTopTracks()">
+            <option value="overall">Overall</option>
+            <option value="7day">Last 7 days</option>
+            <option value="1month">Last month</option>
+            <option value="12month">Last 12 months</option>
+          </select>
+        </div>
+        <div id="top-tracks">
+          <div class="loading"></div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const API_KEY = '${API_KEY}'; // Replace '${API_KEY}' with your actual API key
-        const USERNAME = 'Isaiart';
-        const colorThief = new ColorThief();
-        let lastAlbumArtUrl = '';
-        let currentTrack = null;
-        let progressInterval;
+  <script>
+    const API_KEY = '${API_KEY}'; // Replace with your actual API key
+    const USERNAME = 'Isaiart';
+    const colorThief = new ColorThief();
+    let lastAlbumArtUrl = '';
+    let currentTrack = null;
+    let progressInterval;
 
-        async function fetchLastfmData(method, params = {}) {
-            const queryParams = new URLSearchParams({
-                method: method,
-                user: USERNAME,
-                api_key: API_KEY,
-                format: 'json',
-                ...params
+    async function fetchLastfmData(method, params = {}) {
+      const queryParams = new URLSearchParams({
+        method: method,
+        user: USERNAME,
+        api_key: API_KEY,
+        format: 'json',
+        ...params
+      });
+      const url = `https://ws.audioscrobbler.com/2.0/?${queryParams}`;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+      } catch (error) {
+        console.error(`Error fetching ${method}:`, error);
+        return null;
+      }
+    }
+
+    function getAlbumArtUrl(images, size = 'extralarge') {
+      const image = images.find(img => img.size === size);
+      return image && image['#text'] ? image['#text'] : 'https://via.placeholder.com/300';
+    }
+
+    function setBackgroundImage(url) {
+      const bgImageDiv = document.getElementById('bg-image');
+      bgImageDiv.style.backgroundImage = `url(${url})`;
+    }
+
+    function formatPlayTime(timestamp) {
+      if (!timestamp) return 'Unknown';
+      const now = new Date();
+      const playedAt = new Date(timestamp * 1000);
+      const diff = now - playedAt;
+      const minutes = Math.floor(diff / 60000);
+      if (minutes < 1) return 'Just now';
+      if (minutes === 1) return '1 minute ago';
+      if (minutes < 60) return `${minutes} minutes ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours === 1) return '1 hour ago';
+      if (hours < 24) return `${hours} hours ago`;
+      const days = Math.floor(hours / 24);
+      if (days === 1) return '1 day ago';
+      return `${days} days ago`;
+    }
+
+    function setDynamicTextColor(color) {
+      const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+      const textColor = brightness > 128 ? '#000000' : '#ffffff';
+      document.documentElement.style.setProperty('--text-color', textColor);
+    }
+
+    function createTrackHTML(track, isNowPlaying = false) {
+      const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
+      const playTime = isNowPlaying ? 'Now Playing' : formatPlayTime(track.date ? track.date.uts : null);
+      return `
+        <div class="album-art-container">
+          <img src="${albumArtUrl}" alt="Album art" class="album-art" crossorigin="anonymous">
+        </div>
+        <div class="track-info">
+          <strong>${track.name}</strong>
+          <p>${track.artist['#text']}</p>
+          <p>${track.album['#text']}</p>
+          <p>${playTime}</p>
+        </div>
+        <div class="progress-bar">
+          <div class="progress"></div>
+        </div>
+        <div class="player-controls">
+          <button>⏮️</button>
+          <button>⏯️</button>
+          <button>⏭️</button>
+        </div>
+      `;
+    }
+
+    function startProgressBar() {
+      const progress = document.querySelector('#now-playing-card .progress');
+      let width = 0;
+      clearInterval(progressInterval);
+      progressInterval = setInterval(() => {
+        if (width >= 100) {
+          clearInterval(progressInterval);
+        } else {
+          width++;
+          progress.style.width = width + '%';
+        }
+      }, 3000); // Adjust as needed
+    }
+
+    async function displayNowPlaying() {
+      const data = await fetchLastfmData('user.getrecenttracks', { limit: 1 });
+      const nowPlayingSection = document.getElementById('now-playing');
+      const nowPlayingNewSection = document.getElementById('now-playing-new');
+      const flipCard = document.querySelector('.flip-card');
+
+      if (data && data.recenttracks && data.recenttracks.track && data.recenttracks.track[0]) {
+        const track = data.recenttracks.track[0];
+        const isNowPlaying = track['@attr'] && track['@attr'].nowplaying === 'true';
+        const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
+
+        if (JSON.stringify(track) !== JSON.stringify(currentTrack)) {
+          currentTrack = track;
+          const newTrackHTML = createTrackHTML(track, isNowPlaying);
+
+          if (flipCard.classList.contains('flipped')) {
+            nowPlayingSection.innerHTML = newTrackHTML;
+            flipCard.classList.remove('flipped');
+          } else {
+            nowPlayingNewSection.innerHTML = newTrackHTML;
+            flipCard.classList.add('flipped');
+          }
+
+          setBackgroundImage(albumArtUrl);
+
+          const img = flipCard.querySelector('.album-art');
+          if (img.complete) {
+            const color = colorThief.getColor(img);
+            setDynamicTextColor(color);
+          } else {
+            img.addEventListener('load', function() {
+              const color = colorThief.getColor(img);
+              setDynamicTextColor(color);
             });
-            const url = `https://ws.audioscrobbler.com/2.0/?${queryParams}`;
-            
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error(`Error fetching ${method}:`, error);
-                return null;
-            }
+          }
+          startProgressBar();
         }
+      } else if (currentTrack) {
+        const newTrackHTML = createTrackHTML(currentTrack, false);
+        nowPlayingSection.innerHTML = newTrackHTML;
+        nowPlayingNewSection.innerHTML = newTrackHTML;
+      } else {
+        nowPlayingSection.innerHTML = '<div class="loading"></div>';
+        nowPlayingNewSection.innerHTML = '<div class="loading"></div>';
+      }
+    }
 
-        function getAlbumArtUrl(images, size = 'extralarge') {
-            const image = images.find(img => img.size === size);
-            return image && image['#text'] ? image['#text'] : 'https://via.placeholder.com/300';
-        }
-
-        function setBackgroundImage(url) {
-            const bgImageDiv = document.getElementById('bg-image');
-            bgImageDiv.style.backgroundImage = `url(${url})`;
-        }
-
-        function formatPlayTime(timestamp) {
-            if (!timestamp) return 'Unknown';
-            const now = new Date();
-            const playedAt = new Date(timestamp * 1000);
-            const diff = now - playedAt;
-            const minutes = Math.floor(diff / 60000);
-            if (minutes < 1) return 'Just now';
-            if (minutes === 1) return '1 minute ago';
-            if (minutes < 60) return `${minutes} minutes ago`;
-            const hours = Math.floor(minutes / 60);
-            if (hours === 1) return '1 hour ago';
-            if (hours < 24) return `${hours} hours ago`;
-            const days = Math.floor(hours / 24);
-            if (days === 1) return '1 day ago';
-            return `${days} days ago`;
-        }
-
-        function setDynamicTextColor(color) {
-            const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
-            const textColor = brightness > 128 ? '#000000' : '#ffffff';
-            document.documentElement.style.setProperty('--text-color', textColor);
-        }
-
-        function createTrackHTML(track, isNowPlaying = false) {
-            const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
-            const playTime = isNowPlaying ? 'Now Playing' : formatPlayTime(track.date ? track.date.uts : null);
-            
-            return `
-                <div class="album-art-container">
-                    <img src="${albumArtUrl}" alt="Album art" class="album-art" crossorigin="anonymous">
+    async function displayRecentTracks() {
+      const data = await fetchLastfmData('user.getrecenttracks', { limit: 5 });
+      const recentTracksSection = document.getElementById('recent-tracks');
+      if (data && data.recenttracks && data.recenttracks.track) {
+        const recentTracks = data.recenttracks.track.slice(1); // Exclude the currently playing track
+        const recentTracksHtml = `
+          <ul class="track-list">
+            ${recentTracks.map(track => `
+              <li>
+                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
+                <div>
+                  <strong>${track.name}</strong>
+                  <span>${track.artist['#text']}</span>
+                  <small>${formatPlayTime(track.date ? track.date.uts : null)}</small>
                 </div>
-                <div class="track-info">
-                    <strong>${track.name}</strong>
-                    <p>${track.artist['#text']}</p>
-                    <p>${track.album['#text']}</p>
-                    <p>${playTime}</p>
+              </li>
+            `).join('')}
+          </ul>
+        `;
+        recentTracksSection.innerHTML = recentTracksHtml;
+      } else {
+        recentTracksSection.innerHTML = '<div class="loading"></div>';
+      }
+    }
+
+    async function displayTopTracks() {
+      const period = document.getElementById('period').value;
+      const data = await fetchLastfmData('user.gettoptracks', { period: period, limit: 5 });
+      const topTracksSection = document.getElementById('top-tracks');
+      if (data && data.toptracks && data.toptracks.track) {
+        const topTracks = data.toptracks.track;
+        const topTracksHtml = `
+          <ul class="track-list">
+            ${topTracks.map(track => `
+              <li>
+                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
+                <div>
+                  <strong>${track.name}</strong>
+                  <span>${track.artist.name}</span>
+                  <small>Played ${track.playcount} times</small>
                 </div>
-                <div class="progress-bar">
-                    <div class="progress"></div>
-                </div>
-                <div class="player-controls">
-                    <button>⏮️</button>
-                    <button>⏯️</button>
-                    <button>⏭️</button>
-                </div>
-            `;
-        }
+              </li>
+            `).join('')}
+          </ul>
+        `;
+        topTracksSection.innerHTML = topTracksHtml;
+      } else {
+        topTracksSection.innerHTML = '<div class="loading"></div>';
+      }
+    }
 
-        function startProgressBar() {
-            const progress = document.querySelector('#now-playing-card .progress');
-            let width = 0;
-            clearInterval(progressInterval);
-            progressInterval = setInterval(() => {
-                if (width >= 100) {
-                    clearInterval(progressInterval);
-                } else {
-                    width++;
-                    progress.style.width = width + '%';
-                }
-            }, 3000); // Adjust as needed
-        }
+    function updatePage() {
+      displayNowPlaying();
+      displayRecentTracks();
+      displayTopTracks();
+    }
 
-        async function displayNowPlaying() {
-            const data = await fetchLastfmData('user.getrecenttracks', { limit: 1 });
-            const nowPlayingSection = document.getElementById('now-playing');
-            const nowPlayingNewSection = document.getElementById('now-playing-new');
-            const flipCard = document.querySelector('.flip-card');
-            
-            if (data && data.recenttracks && data.recenttracks.track && data.recenttracks.track[0]) {
-                const track = data.recenttracks.track[0];
-                const isNowPlaying = track['@attr'] && track['@attr'].nowplaying === 'true';
-                const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
-
-                if (JSON.stringify(track) !== JSON.stringify(currentTrack)) {
-                    currentTrack = track;
-                    const newTrackHTML = createTrackHTML(track, isNowPlaying);
-
-                    if (flipCard.classList.contains('flipped')) {
-                        nowPlayingSection.innerHTML = newTrackHTML;
-                        flipCard.classList.remove('flipped');
-                    } else {
-                        nowPlayingNewSection.innerHTML = newTrackHTML;
-                        flipCard.classList.add('flipped');
-                    }
-
-                    setBackgroundImage(albumArtUrl);
-
-                    const img = flipCard.querySelector('.album-art');
-                    if (img.complete) {
-                        const color = colorThief.getColor(img);
-                        setDynamicTextColor(color);
-                    } else {
-                        img.addEventListener('load', function() {
-                            const color = colorThief.getColor(img);
-                            setDynamicTextColor(color);
-                        });
-                    }
-
-                    startProgressBar();
-                }
-            } else if (currentTrack) {
-                // Keep showing the most recent track if no current track is found
-                const newTrackHTML = createTrackHTML(currentTrack, false);
-                nowPlayingSection.innerHTML = newTrackHTML;
-                nowPlayingNewSection.innerHTML = newTrackHTML;
-            } else {
-                nowPlayingSection.innerHTML = '<div class="loading"></div>';
-                nowPlayingNewSection.innerHTML = '<div class="loading"></div>';
-            }
-        }
-
-        async function displayRecentTracks() {
-            const data = await fetchLastfmData('user.getrecenttracks', { limit: 5 });
-            const recentTracksSection = document.getElementById('recent-tracks');
-            
-            if (data && data.recenttracks && data.recenttracks.track) {
-                const recentTracks = data.recenttracks.track.slice(1); // Exclude the currently playing track
-                const recentTracksHtml = `
-                    <ul class="track-list">
-                        ${recentTracks.map(track => `
-                            <li>
-                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
-                                <div>
-                                    <strong>${track.name}</strong>
-                                    <br>${track.artist['#text']}
-                                    <br><small>${formatPlayTime(track.date ? track.date.uts : null)}</small>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
-                recentTracksSection.innerHTML = recentTracksHtml;
-            } else {
-                recentTracksSection.innerHTML = '<div class="loading"></div>';
-            }
-        }
-
-        async function displayTopTracks() {
-            const period = document.getElementById('period').value;
-            const data = await fetchLastfmData('user.gettoptracks', { period: period, limit: 5 });
-            const topTracksSection = document.getElementById('top-tracks');
-            
-            if (data && data.toptracks && data.toptracks.track) {
-                const topTracks = data.toptracks.track;
-                const topTracksHtml = `
-                    <ul class="track-list">
-                        ${topTracks.map(track => `
-                            <li>
-                                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
-                                <div>
-                                    <strong>${track.name}</strong>
-                                    <br>${track.artist.name}
-                                    <br><small>Played ${track.playcount} times</small>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
-                topTracksSection.innerHTML = topTracksHtml;
-            } else {
-                topTracksSection.innerHTML = '<div class="loading"></div>';
-            }
-        }
-
-        function updatePage() {
-            displayNowPlaying();
-            displayRecentTracks();
-            displayTopTracks();
-        }
-
-        // Initial page load
-        updatePage();
-
-        // Refresh data every 10 seconds
-        setInterval(updatePage, 10000);
-    </script>
+    // Initial page load
+    updatePage();
+    // Refresh data every 10 seconds
+    setInterval(updatePage, 10000);
+  </script>
 </body>
 </html>
