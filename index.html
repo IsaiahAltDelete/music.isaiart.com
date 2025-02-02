@@ -313,30 +313,41 @@
     <!-- Sidebar with Tab Navigation -->
     <div class="sidebar">
       <div class="tab-nav">
-        <button id="tab-songs-btn" class="active" title="Top Songs"><i class="material-icons">music_note</i></button>
-        <button id="tab-artists-btn" title="Top Artists"><i class="material-icons">person</i></button>
+        <!-- Tab order: Recently Played > Top Albums > Top Artists > Top Songs -->
+        <button id="tab-recent-btn" class="active" title="Recently Played"><i class="material-icons">history</i></button>
         <button id="tab-albums-btn" title="Top Albums"><i class="material-icons">album</i></button>
-        <button id="tab-recent-btn" title="Recently Played"><i class="material-icons">history</i></button>
+        <button id="tab-artists-btn" title="Top Artists"><i class="material-icons">person</i></button>
+        <button id="tab-songs-btn" title="Top Songs"><i class="material-icons">music_note</i></button>
       </div>
       
-      <!-- Tab Content for Top Songs -->
-      <div id="tab-songs" class="tab-content active">
+      <!-- Tab Content for Recently Played -->
+      <div id="tab-recent" class="tab-content active">
         <header>
-          <h2>Top Songs</h2>
-          <select id="top-songs-interval">
+          <h2>Recently Played</h2>
+        </header>
+        <ul class="track-list" id="recent-tracks-list">
+          <li>Loading...</li>
+        </ul>
+      </div>
+      
+      <!-- Tab Content for Top Albums -->
+      <div id="tab-albums" class="tab-content">
+        <header>
+          <h2>Top Albums</h2>
+          <select id="top-albums-interval">
             <option value="overall">Overall</option>
             <option value="7day">7 Day</option>
             <option value="1month" selected>1 Month</option>
             <option value="12month">12 Month</option>
           </select>
         </header>
-        <ul class="track-list" id="top-songs-list">
+        <ul class="track-list" id="top-albums-list">
           <li>Loading...</li>
         </ul>
-        <div class="pagination" id="top-songs-pagination">
-          <button id="top-songs-prev"><i class="material-icons">chevron_left</i></button>
-          <span id="top-songs-page-number">1</span>
-          <button id="top-songs-next"><i class="material-icons">chevron_right</i></button>
+        <div class="pagination" id="top-albums-pagination">
+          <button id="top-albums-prev"><i class="material-icons">chevron_left</i></button>
+          <span id="top-albums-page-number">1</span>
+          <button id="top-albums-next"><i class="material-icons">chevron_right</i></button>
         </div>
       </div>
       
@@ -361,35 +372,25 @@
         </div>
       </div>
       
-      <!-- Tab Content for Top Albums -->
-      <div id="tab-albums" class="tab-content">
+      <!-- Tab Content for Top Songs -->
+      <div id="tab-songs" class="tab-content">
         <header>
-          <h2>Top Albums</h2>
-          <select id="top-albums-interval">
+          <h2>Top Songs</h2>
+          <select id="top-songs-interval">
             <option value="overall">Overall</option>
             <option value="7day">7 Day</option>
             <option value="1month" selected>1 Month</option>
             <option value="12month">12 Month</option>
           </select>
         </header>
-        <ul class="track-list" id="top-albums-list">
+        <ul class="track-list" id="top-songs-list">
           <li>Loading...</li>
         </ul>
-        <div class="pagination" id="top-albums-pagination">
-          <button id="top-albums-prev"><i class="material-icons">chevron_left</i></button>
-          <span id="top-albums-page-number">1</span>
-          <button id="top-albums-next"><i class="material-icons">chevron_right</i></button>
+        <div class="pagination" id="top-songs-pagination">
+          <button id="top-songs-prev"><i class="material-icons">chevron_left</i></button>
+          <span id="top-songs-page-number">1</span>
+          <button id="top-songs-next"><i class="material-icons">chevron_right</i></button>
         </div>
-      </div>
-      
-      <!-- Tab Content for Recently Played -->
-      <div id="tab-recent" class="tab-content">
-        <header>
-          <h2>Recently Played</h2>
-        </header>
-        <ul class="track-list" id="recent-tracks-list">
-          <li>Loading...</li>
-        </ul>
       </div>
     </div>
   </div>
@@ -425,9 +426,14 @@
       }
     }
     
+    // Modified to check if the image is empty; if so, return a placeholder with "No Image" text.
     function getAlbumArtUrl(images, size = 'extralarge') {
       const image = images.find(img => img.size === size);
-      return image && image['#text'] ? image['#text'] : 'https://via.placeholder.com/300';
+      if (image && image['#text']) {
+        return image['#text'];
+      } else {
+        return 'https://via.placeholder.com/300?text=No+Image';
+      }
     }
     
     function setBackgroundImage(url) {
@@ -451,11 +457,8 @@
       return `${days} days ago`;
     }
     
-    function setDynamicTextColor(color) {
-      const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
-      const textColor = brightness > 128 ? '#000000' : '#ffffff';
-      document.documentElement.style.setProperty('--text-color', textColor);
-    }
+    // Removed dynamic text color adjustment so text stays white.
+    // function setDynamicTextColor(color) { ... } // Not used.
     
     // Update Now Playing Section
     function updateNowPlaying(track) {
@@ -464,24 +467,11 @@
       document.getElementById('track-title').textContent = track.name;
       document.getElementById('track-artist').textContent = track.artist['#text'];
       setBackgroundImage(albumArtUrl);
-    
-      // Update text color based on album art
-      const img = document.querySelector('.album-art');
-      if (img.complete) {
-        const color = colorThief.getColor(img);
-        setDynamicTextColor(color);
-      } else {
-        img.addEventListener('load', function() {
-          const color = colorThief.getColor(img);
-          setDynamicTextColor(color);
-        });
-      }
     }
     
     // Create HTML for a track list item.
     // For top songs, if available, use the track’s album art cover.
     function createTrackListItem(track, extraInfo = '') {
-      // Use the image provided by the track object; if empty, the placeholder is used.
       const albumArtUrl = getAlbumArtUrl(track.image, 'small');
       const playTime = track.date ? formatPlayTime(track.date.uts) : '';
       return `
@@ -509,7 +499,7 @@
     
     // Create HTML for an album list item.
     function createAlbumListItem(album) {
-      const albumArtUrl = album.image && album.image.length ? getAlbumArtUrl(album.image, 'extralarge') : 'https://via.placeholder.com/300';
+      const albumArtUrl = album.image && album.image.length ? getAlbumArtUrl(album.image, 'extralarge') : 'https://via.placeholder.com/300?text=No+Image';
       return `
         <li>
           <img src="${albumArtUrl}" alt="Album Art" class="mini-art">
@@ -550,7 +540,7 @@
     
     // Fetch and display recently played tracks.
     async function displayRecentTracks() {
-      const data = await fetchLastfmData('user.getrecenttracks', { limit: 6 });
+      const data = await fetchLastfmData('user.getrecenttracks', { limit: 10 });
       const recentTracksList = document.getElementById('recent-tracks-list');
       if (data && data.recenttracks && data.recenttracks.track) {
         const recentTracks = data.recenttracks.track.filter(track => !track['@attr'] || !track['@attr'].nowplaying);
@@ -563,7 +553,7 @@
     // Fetch and display top songs.
     async function displayTopSongs() {
       const interval = document.getElementById('top-songs-interval').value;
-      const data = await fetchLastfmData('user.gettoptracks', { period: interval, limit: 6, page: topSongsPage });
+      const data = await fetchLastfmData('user.gettoptracks', { period: interval, limit: 10, page: topSongsPage });
       const topSongsList = document.getElementById('top-songs-list');
       if (data && data.toptracks && data.toptracks.track) {
         topSongsList.innerHTML = data.toptracks.track.map(track => createTrackListItem(track, `Plays: ${track.playcount}`)).join('');
@@ -576,7 +566,7 @@
     // Fetch and display top artists.
     async function displayTopArtists() {
       const interval = document.getElementById('top-artists-interval').value;
-      const data = await fetchLastfmData('user.gettopartists', { period: interval, limit: 6, page: topArtistsPage });
+      const data = await fetchLastfmData('user.gettopartists', { period: interval, limit: 10, page: topArtistsPage });
       const topArtistsList = document.getElementById('top-artists-list');
       if (data && data.topartists && data.topartists.artist) {
         topArtistsList.innerHTML = data.topartists.artist.map(artist => createArtistListItem(artist)).join('');
@@ -589,7 +579,7 @@
     // Fetch and display top albums.
     async function displayTopAlbums() {
       const interval = document.getElementById('top-albums-interval').value;
-      const data = await fetchLastfmData('user.gettopalbums', { period: interval, limit: 6, page: topAlbumsPage });
+      const data = await fetchLastfmData('user.gettopalbums', { period: interval, limit: 10, page: topAlbumsPage });
       const topAlbumsList = document.getElementById('top-albums-list');
       if (data && data.topalbums && data.topalbums.album) {
         topAlbumsList.innerHTML = data.topalbums.album.map(album => createAlbumListItem(album)).join('');
@@ -644,16 +634,16 @@
     
     // Tab Navigation
     const tabs = {
-      songs: document.getElementById('tab-songs'),
-      artists: document.getElementById('tab-artists'),
+      recent: document.getElementById('tab-recent'),
       albums: document.getElementById('tab-albums'),
-      recent: document.getElementById('tab-recent')
+      artists: document.getElementById('tab-artists'),
+      songs: document.getElementById('tab-songs')
     };
     const tabButtons = {
-      songs: document.getElementById('tab-songs-btn'),
-      artists: document.getElementById('tab-artists-btn'),
+      recent: document.getElementById('tab-recent-btn'),
       albums: document.getElementById('tab-albums-btn'),
-      recent: document.getElementById('tab-recent-btn')
+      artists: document.getElementById('tab-artists-btn'),
+      songs: document.getElementById('tab-songs-btn')
     };
     
     function switchTab(tabName) {
@@ -667,10 +657,10 @@
     }
     
     // Attach event listeners to tab buttons.
-    tabButtons.songs.addEventListener('click', () => switchTab('songs'));
-    tabButtons.artists.addEventListener('click', () => switchTab('artists'));
-    tabButtons.albums.addEventListener('click', () => switchTab('albums'));
     tabButtons.recent.addEventListener('click', () => switchTab('recent'));
+    tabButtons.albums.addEventListener('click', () => switchTab('albums'));
+    tabButtons.artists.addEventListener('click', () => switchTab('artists'));
+    tabButtons.songs.addEventListener('click', () => switchTab('songs'));
     
     // Initial load and update every 10 seconds.
     updatePage();
