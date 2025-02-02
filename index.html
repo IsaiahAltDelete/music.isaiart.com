@@ -148,7 +148,22 @@
       padding: 20px;
       display: flex;
       flex-direction: column;
+      /* Custom scrollbar for sidebar */
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-color) var(--secondary-bg);
     }
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+    .sidebar::-webkit-scrollbar-track {
+      background: var(--secondary-bg);
+      border-radius: var(--border-radius);
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--accent-color);
+      border-radius: var(--border-radius);
+    }
+    
     .tab-nav {
       display: flex;
       justify-content: space-around;
@@ -456,9 +471,6 @@
       if (days === 1) return '1 day ago';
       return `${days} days ago`;
     }
-    
-    // Removed dynamic text color adjustment so text stays white.
-    // function setDynamicTextColor(color) { ... } // Not used.
     
     // Update Now Playing Section
     function updateNowPlaying(track) {
