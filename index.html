@@ -3,39 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MUSIC</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-  <!-- You can replace this font import with your own if you have access to Spotify's font -->
+  <title>Dynamic Music Player</title>
+  <!-- Material Icons for all icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Font for content -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
   <style>
     :root {
-      /* Spotify-inspired color palette */
+      /* Spotify-inspired palette */
       --primary-bg: #121212;
       --secondary-bg: #181818;
-      --card-bg: rgba(25, 25, 25, 0.9);
+      --card-bg: rgba(25, 25, 25, 0.95);
       --accent-color: #1DB954;
       --text-color: #FFFFFF;
       --subtext-color: #B3B3B3;
-      --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
       --transition-speed: 0.3s;
       --border-radius: 10px;
     }
-
-    /* Reset and Base Styles */
+    
+    /* Global Reset */
     *, *::before, *::after {
       box-sizing: border-box;
     }
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+      font-family: 'Montserrat', sans-serif;
       background-color: var(--primary-bg);
       color: var(--text-color);
-      overflow-x: hidden;
+      height: 100%;
+      overflow: hidden;
     }
-
-    /* Background Image */
+    
+    /* Blurred background image */
     #bg-image {
       position: fixed;
       top: 0;
@@ -49,60 +50,37 @@
       z-index: -1;
       transition: background-image 0.5s ease;
     }
-
-    /* Container */
-    .container {
+    
+    /* Main layout container */
+    .main-container {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    /* Card Container */
-    .card-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
+      height: 100vh;
       width: 100%;
-      max-width: 1200px;
     }
-
-    /* Card Styles */
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      padding: 20px;
-      box-shadow: var(--card-shadow);
-      flex: 1 1 300px;
-      min-width: 280px;
-      transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    
+    /* Now Playing Section */
+    .now-playing-section {
+      flex: 3;
       display: flex;
       flex-direction: column;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
-    }
-
-    /* Headings */
-    h2 {
-      margin: 0 0 15px;
-      font-size: 1.5em;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
       text-align: center;
-    }
-
-    /* Album Art Container */
-    .album-art-container {
-      width: 100%;
-      max-width: 200px;
-      margin: 0 auto 20px;
       position: relative;
+    }
+    
+    .album-art-container {
+      width: 300px;
+      height: 300px;
+      margin-bottom: 20px;
     }
     .album-art {
       width: 100%;
+      height: 100%;
+      object-fit: cover;
       border-radius: 50%;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
       animation: spin 20s linear infinite;
       transition: transform var(--transition-speed) ease;
     }
@@ -112,90 +90,146 @@
     @keyframes spin {
       100% { transform: rotate(360deg); }
     }
-
-    /* Track Info */
+    
     .track-info {
-      text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
-    .track-info strong {
-      font-size: 1.1em;
+    .track-info h1 {
+      margin: 0;
+      font-size: 2em;
     }
-    .track-info p {
-      margin: 5px 0;
+    .track-info h3 {
+      margin: 5px 0 0 0;
       color: var(--subtext-color);
+      font-weight: 400;
     }
-
-    /* Progress Bar */
+    
     .progress-bar {
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      margin: 15px auto;
       width: 80%;
-      position: relative;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 20px auto;
     }
     .progress {
       width: 0%;
       height: 100%;
       background: var(--accent-color);
-      border-radius: 2px;
       transition: width 1s linear;
     }
-
-    /* Player Controls */
+    
     .player-controls {
       display: flex;
+      gap: 20px;
       justify-content: center;
-      margin-top: auto;
+      margin-top: 10px;
     }
     .player-controls button {
       background: var(--secondary-bg);
       border: none;
-      width: 40px;
-      height: 40px;
       border-radius: 50%;
-      margin: 0 10px;
+      width: 50px;
+      height: 50px;
       cursor: pointer;
+      font-size: 24px;
+      color: var(--text-color);
+      transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      color: var(--text-color);
-      transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
     }
     .player-controls button:hover {
       background: var(--accent-color);
       transform: scale(1.1);
     }
-
-    /* Track List */
+    
+    /* Sidebar with multiple sections */
+    .sidebar {
+      flex: 2;
+      background: var(--card-bg);
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .sidebar-section {
+      margin-bottom: 30px;
+    }
+    .sidebar-section header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+    .sidebar-section header h2 {
+      font-size: 1.4em;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-section header .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-section header select {
+      padding: 4px;
+      border-radius: var(--border-radius);
+      border: none;
+      background: var(--secondary-bg);
+      color: var(--text-color);
+      font-size: 0.9em;
+    }
+    .pagination {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .pagination button {
+      background: var(--secondary-bg);
+      border: none;
+      border-radius: var(--border-radius);
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      color: var(--text-color);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color var(--transition-speed) ease;
+    }
+    .pagination button:hover {
+      background: var(--accent-color);
+    }
+    
     .track-list {
       list-style: none;
       padding: 0;
       margin: 0;
-      overflow-y: auto;
-      flex-grow: 1;
-      max-height: 300px;
     }
     .track-list li {
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      background: var(--secondary-bg);
-      transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
       display: flex;
       align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+      cursor: pointer;
     }
     .track-list li:hover {
-      background: var(--accent-color);
+      background: var(--secondary-bg);
       transform: translateX(5px);
     }
-    .track-list .mini-art {
-      width: 40px;
-      height: 40px;
+    .mini-art {
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       margin-right: 10px;
+      object-fit: cover;
     }
     .track-list li div {
       display: flex;
@@ -207,174 +241,142 @@
     .track-list li small {
       color: var(--subtext-color);
     }
-
-    /* Period Selector */
-    #period-selector {
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    select {
-      padding: 8px 12px;
-      border-radius: var(--border-radius);
-      border: none;
-      background: var(--secondary-bg);
-      color: var(--text-color);
-      font-size: 1em;
-      cursor: pointer;
-      transition: background-color var(--transition-speed) ease;
-    }
-    select:hover {
-      background: var(--accent-color);
-    }
-
-    /* Flip Card */
-    .flip-card {
-      position: relative;
-      transition: transform 0.8s;
-      transform-style: preserve-3d;
-      width: 100%;
-      height: 100%;
-    }
-    .flip-card-front,
-    .flip-card-back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      top: 0;
-      left: 0;
-    }
-    .flip-card-back {
-      transform: rotateY(180deg);
-    }
-    .flipped {
-      transform: rotateY(180deg);
-    }
-
-    /* Loading Spinner */
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-    }
-    .loading::after {
-      content: "";
-      width: 40px;
-      height: 40px;
-      border: 4px solid var(--accent-color);
-      border-top: 4px solid transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 1200px) {
-      .card {
-        flex: 1 1 45%;
-      }
-    }
-    @media (max-width: 768px) {
-      .card-container {
+    
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .main-container {
         flex-direction: column;
-        align-items: center;
       }
-      .card {
-        flex: 1 1 100%;
-        max-width: 500px;
+      .now-playing-section {
+        flex: none;
       }
-      .album-art-container {
-        max-width: 150px;
-      }
-      h2 {
-        font-size: 1.3em;
-      }
-      select {
-        font-size: 0.95em;
-      }
-    }
-    @media (max-width: 480px) {
-      .album-art-container {
-        max-width: 120px;
-      }
-      .track-list .mini-art {
-        width: 35px;
-        height: 35px;
-      }
-      .player-controls button {
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
-        margin: 0 8px;
-      }
-      h2 {
-        font-size: 1.1em;
-      }
-      select {
-        font-size: 0.9em;
+      .sidebar {
+        flex: none;
+        height: 50vh;
       }
     }
   </style>
 </head>
 <body>
   <div id="bg-image"></div>
-  <div class="container">
-    <div class="card-container">
-      <!-- Recently Played Card -->
-      <div class="card" id="recent-tracks-card">
-        <h2>RECENTLY PLAYED</h2>
-        <div id="recent-tracks">
-          <div class="loading"></div>
+  <div class="main-container">
+    <!-- Now Playing Section -->
+    <div class="now-playing-section">
+      <div class="album-art-container">
+        <img src="https://via.placeholder.com/300" alt="Album Art" class="album-art" crossorigin="anonymous">
+      </div>
+      <div class="track-info">
+        <h1 id="track-title">Track Title</h1>
+        <h3 id="track-artist">Artist Name</h3>
+      </div>
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+      <div class="player-controls">
+        <button id="prev-btn"><i class="material-icons">skip_previous</i></button>
+        <button id="play-btn"><i class="material-icons">play_arrow</i></button>
+        <button id="next-btn"><i class="material-icons">skip_next</i></button>
+      </div>
+    </div>
+    
+    <!-- Sidebar for Top Sections and Recently Played -->
+    <div class="sidebar">
+      <!-- Top Songs Section -->
+      <div class="sidebar-section" id="top-songs-section">
+        <header>
+          <h2><i class="material-icons">music_note</i> Top Songs</h2>
+          <div class="controls">
+            <select id="top-songs-interval">
+              <option value="overall">Overall</option>
+              <option value="7day">7 Day</option>
+              <option value="1month" selected>1 Month</option>
+              <option value="12month">12 Month</option>
+            </select>
+          </div>
+        </header>
+        <ul class="track-list" id="top-songs-list">
+          <li>Loading...</li>
+        </ul>
+        <div class="pagination" id="top-songs-pagination">
+          <button id="top-songs-prev"><i class="material-icons">chevron_left</i></button>
+          <span id="top-songs-page-number">1</span>
+          <button id="top-songs-next"><i class="material-icons">chevron_right</i></button>
         </div>
       </div>
-
-      <!-- Now Playing Card with Flip Animation -->
-      <div class="card" id="now-playing-card">
-        <div class="flip-card">
-          <div class="flip-card-front">
-            <h2>NOW PLAYING</h2>
-            <div id="now-playing">
-              <div class="loading"></div>
-            </div>
+      
+      <!-- Top Artists Section -->
+      <div class="sidebar-section" id="top-artists-section">
+        <header>
+          <h2><i class="material-icons">person</i> Top Artists</h2>
+          <div class="controls">
+            <select id="top-artists-interval">
+              <option value="overall">Overall</option>
+              <option value="7day">7 Day</option>
+              <option value="1month" selected>1 Month</option>
+              <option value="12month">12 Month</option>
+            </select>
           </div>
-          <div class="flip-card-back">
-            <h2>NOW PLAYING</h2>
-            <div id="now-playing-new">
-              <div class="loading"></div>
-            </div>
-          </div>
+        </header>
+        <ul class="track-list" id="top-artists-list">
+          <li>Loading...</li>
+        </ul>
+        <div class="pagination" id="top-artists-pagination">
+          <button id="top-artists-prev"><i class="material-icons">chevron_left</i></button>
+          <span id="top-artists-page-number">1</span>
+          <button id="top-artists-next"><i class="material-icons">chevron_right</i></button>
         </div>
       </div>
-
-      <!-- Top Songs Card -->
-      <div class="card" id="top-tracks-card">
-        <h2>TOP SONGS</h2>
-        <div id="period-selector">
-          <select id="period" onchange="displayTopTracks()">
-            <option value="overall">Overall</option>
-            <option value="7day">Last 7 days</option>
-            <option value="1month">Last month</option>
-            <option value="12month">Last 12 months</option>
-          </select>
+      
+      <!-- Top Albums Section -->
+      <div class="sidebar-section" id="top-albums-section">
+        <header>
+          <h2><i class="material-icons">album</i> Top Albums</h2>
+          <div class="controls">
+            <select id="top-albums-interval">
+              <option value="overall">Overall</option>
+              <option value="7day">7 Day</option>
+              <option value="1month" selected>1 Month</option>
+              <option value="12month">12 Month</option>
+            </select>
+          </div>
+        </header>
+        <ul class="track-list" id="top-albums-list">
+          <li>Loading...</li>
+        </ul>
+        <div class="pagination" id="top-albums-pagination">
+          <button id="top-albums-prev"><i class="material-icons">chevron_left</i></button>
+          <span id="top-albums-page-number">1</span>
+          <button id="top-albums-next"><i class="material-icons">chevron_right</i></button>
         </div>
-        <div id="top-tracks">
-          <div class="loading"></div>
-        </div>
+      </div>
+      
+      <!-- Recently Played Section -->
+      <div class="sidebar-section" id="recent-section">
+        <header>
+          <h2><i class="material-icons">history</i> Recently Played</h2>
+        </header>
+        <ul class="track-list" id="recent-tracks-list">
+          <li>Loading...</li>
+        </ul>
       </div>
     </div>
   </div>
-
+  
   <script>
-    const API_KEY = '${API_KEY}'; // Replace with your actual API key
+    // Replace these with your actual Last.fm API key and username.
+    const API_KEY = '${API_KEY}';
     const USERNAME = 'Isaiart';
     const colorThief = new ColorThief();
-    let lastAlbumArtUrl = '';
     let currentTrack = null;
     let progressInterval;
-
+    
+    // Pagination state for top sections.
+    let topSongsPage = 1, topArtistsPage = 1, topAlbumsPage = 1;
+    
+    // Helper function for fetching data from Last.fm.
     async function fetchLastfmData(method, params = {}) {
       const queryParams = new URLSearchParams({
-        method: method,
+        method,
         user: USERNAME,
         api_key: API_KEY,
         format: 'json',
@@ -390,17 +392,16 @@
         return null;
       }
     }
-
+    
     function getAlbumArtUrl(images, size = 'extralarge') {
       const image = images.find(img => img.size === size);
       return image && image['#text'] ? image['#text'] : 'https://via.placeholder.com/300';
     }
-
+    
     function setBackgroundImage(url) {
-      const bgImageDiv = document.getElementById('bg-image');
-      bgImageDiv.style.backgroundImage = `url(${url})`;
+      document.getElementById('bg-image').style.backgroundImage = `url(${url})`;
     }
-
+    
     function formatPlayTime(timestamp) {
       if (!timestamp) return 'Unknown';
       const now = new Date();
@@ -417,158 +418,200 @@
       if (days === 1) return '1 day ago';
       return `${days} days ago`;
     }
-
+    
     function setDynamicTextColor(color) {
       const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
       const textColor = brightness > 128 ? '#000000' : '#ffffff';
       document.documentElement.style.setProperty('--text-color', textColor);
     }
-
-    function createTrackHTML(track, isNowPlaying = false) {
+    
+    // Update Now Playing Section
+    function updateNowPlaying(track) {
       const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
-      const playTime = isNowPlaying ? 'Now Playing' : formatPlayTime(track.date ? track.date.uts : null);
+      document.querySelector('.album-art').src = albumArtUrl;
+      document.getElementById('track-title').textContent = track.name;
+      document.getElementById('track-artist').textContent = track.artist['#text'];
+      setBackgroundImage(albumArtUrl);
+    
+      // Update text color based on album art
+      const img = document.querySelector('.album-art');
+      if (img.complete) {
+        const color = colorThief.getColor(img);
+        setDynamicTextColor(color);
+      } else {
+        img.addEventListener('load', function() {
+          const color = colorThief.getColor(img);
+          setDynamicTextColor(color);
+        });
+      }
+    }
+    
+    // Create HTML for a track list item (used for top songs and recently played)
+    function createTrackListItem(track, extraInfo = '') {
+      const albumArtUrl = getAlbumArtUrl(track.image, 'small');
+      const playTime = track.date ? formatPlayTime(track.date.uts) : '';
       return `
-        <div class="album-art-container">
-          <img src="${albumArtUrl}" alt="Album art" class="album-art" crossorigin="anonymous">
-        </div>
-        <div class="track-info">
-          <strong>${track.name}</strong>
-          <p>${track.artist['#text']}</p>
-          <p>${track.album['#text']}</p>
-          <p>${playTime}</p>
-        </div>
-        <div class="progress-bar">
-          <div class="progress"></div>
-        </div>
-        <div class="player-controls">
-          <button>⏮️</button>
-          <button>⏯️</button>
-          <button>⏭️</button>
-        </div>
+        <li>
+          <img src="${albumArtUrl}" alt="Album Art" class="mini-art">
+          <div>
+            <strong>${track.name}</strong>
+            <small>${track.artist['#text'] || track.artist.name}${extraInfo ? ' • ' + extraInfo : ''} ${playTime}</small>
+          </div>
+        </li>
       `;
     }
-
+    
+    // Create HTML for an artist list item
+    function createArtistListItem(artist) {
+      return `
+        <li>
+          <div>
+            <strong>${artist.name}</strong>
+            <small>Plays: ${artist.playcount}</small>
+          </div>
+        </li>
+      `;
+    }
+    
+    // Create HTML for an album list item
+    function createAlbumListItem(album) {
+      const albumArtUrl = album.image && album.image.length ? getAlbumArtUrl(album.image, 'extralarge') : 'https://via.placeholder.com/300';
+      return `
+        <li>
+          <img src="${albumArtUrl}" alt="Album Art" class="mini-art">
+          <div>
+            <strong>${album.name}</strong>
+            <small>${album.artist.name}</small>
+          </div>
+        </li>
+      `;
+    }
+    
     function startProgressBar() {
-      const progress = document.querySelector('#now-playing-card .progress');
+      const progress = document.querySelector('.progress');
       let width = 0;
       clearInterval(progressInterval);
+      progress.style.width = '0%';
       progressInterval = setInterval(() => {
-        if (width >= 100) {
-          clearInterval(progressInterval);
-        } else {
+        if (width >= 100) clearInterval(progressInterval);
+        else {
           width++;
           progress.style.width = width + '%';
         }
-      }, 3000); // Adjust as needed
+      }, 3000); // Adjust timing as needed
     }
-
+    
+    // Fetch and display now playing track.
     async function displayNowPlaying() {
       const data = await fetchLastfmData('user.getrecenttracks', { limit: 1 });
-      const nowPlayingSection = document.getElementById('now-playing');
-      const nowPlayingNewSection = document.getElementById('now-playing-new');
-      const flipCard = document.querySelector('.flip-card');
-
       if (data && data.recenttracks && data.recenttracks.track && data.recenttracks.track[0]) {
         const track = data.recenttracks.track[0];
-        const isNowPlaying = track['@attr'] && track['@attr'].nowplaying === 'true';
-        const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
-
         if (JSON.stringify(track) !== JSON.stringify(currentTrack)) {
           currentTrack = track;
-          const newTrackHTML = createTrackHTML(track, isNowPlaying);
-
-          if (flipCard.classList.contains('flipped')) {
-            nowPlayingSection.innerHTML = newTrackHTML;
-            flipCard.classList.remove('flipped');
-          } else {
-            nowPlayingNewSection.innerHTML = newTrackHTML;
-            flipCard.classList.add('flipped');
-          }
-
-          setBackgroundImage(albumArtUrl);
-
-          const img = flipCard.querySelector('.album-art');
-          if (img.complete) {
-            const color = colorThief.getColor(img);
-            setDynamicTextColor(color);
-          } else {
-            img.addEventListener('load', function() {
-              const color = colorThief.getColor(img);
-              setDynamicTextColor(color);
-            });
-          }
+          updateNowPlaying(track);
           startProgressBar();
         }
-      } else if (currentTrack) {
-        const newTrackHTML = createTrackHTML(currentTrack, false);
-        nowPlayingSection.innerHTML = newTrackHTML;
-        nowPlayingNewSection.innerHTML = newTrackHTML;
-      } else {
-        nowPlayingSection.innerHTML = '<div class="loading"></div>';
-        nowPlayingNewSection.innerHTML = '<div class="loading"></div>';
       }
     }
-
+    
+    // Fetch and display recently played tracks.
     async function displayRecentTracks() {
-      const data = await fetchLastfmData('user.getrecenttracks', { limit: 5 });
-      const recentTracksSection = document.getElementById('recent-tracks');
+      const data = await fetchLastfmData('user.getrecenttracks', { limit: 6 });
+      const recentTracksList = document.getElementById('recent-tracks-list');
       if (data && data.recenttracks && data.recenttracks.track) {
-        const recentTracks = data.recenttracks.track.slice(1); // Exclude the currently playing track
-        const recentTracksHtml = `
-          <ul class="track-list">
-            ${recentTracks.map(track => `
-              <li>
-                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
-                <div>
-                  <strong>${track.name}</strong>
-                  <span>${track.artist['#text']}</span>
-                  <small>${formatPlayTime(track.date ? track.date.uts : null)}</small>
-                </div>
-              </li>
-            `).join('')}
-          </ul>
-        `;
-        recentTracksSection.innerHTML = recentTracksHtml;
+        const recentTracks = data.recenttracks.track.filter(track => !track['@attr'] || !track['@attr'].nowplaying);
+        recentTracksList.innerHTML = recentTracks.map(track => createTrackListItem(track)).join('');
       } else {
-        recentTracksSection.innerHTML = '<div class="loading"></div>';
+        recentTracksList.innerHTML = '<li>Loading...</li>';
       }
     }
-
-    async function displayTopTracks() {
-      const period = document.getElementById('period').value;
-      const data = await fetchLastfmData('user.gettoptracks', { period: period, limit: 5 });
-      const topTracksSection = document.getElementById('top-tracks');
+    
+    // Fetch and display top songs.
+    async function displayTopSongs() {
+      const interval = document.getElementById('top-songs-interval').value;
+      const data = await fetchLastfmData('user.gettoptracks', { period: interval, limit: 6, page: topSongsPage });
+      const topSongsList = document.getElementById('top-songs-list');
       if (data && data.toptracks && data.toptracks.track) {
-        const topTracks = data.toptracks.track;
-        const topTracksHtml = `
-          <ul class="track-list">
-            ${topTracks.map(track => `
-              <li>
-                <img src="${getAlbumArtUrl(track.image, 'small')}" alt="Album art" class="mini-art">
-                <div>
-                  <strong>${track.name}</strong>
-                  <span>${track.artist.name}</span>
-                  <small>Played ${track.playcount} times</small>
-                </div>
-              </li>
-            `).join('')}
-          </ul>
-        `;
-        topTracksSection.innerHTML = topTracksHtml;
+        topSongsList.innerHTML = data.toptracks.track.map(track => createTrackListItem(track, `Plays: ${track.playcount}`)).join('');
       } else {
-        topTracksSection.innerHTML = '<div class="loading"></div>';
+        topSongsList.innerHTML = '<li>Loading...</li>';
       }
+      document.getElementById('top-songs-page-number').textContent = topSongsPage;
     }
-
+    
+    // Fetch and display top artists.
+    async function displayTopArtists() {
+      const interval = document.getElementById('top-artists-interval').value;
+      const data = await fetchLastfmData('user.gettopartists', { period: interval, limit: 6, page: topArtistsPage });
+      const topArtistsList = document.getElementById('top-artists-list');
+      if (data && data.topartists && data.topartists.artist) {
+        topArtistsList.innerHTML = data.topartists.artist.map(artist => createArtistListItem(artist)).join('');
+      } else {
+        topArtistsList.innerHTML = '<li>Loading...</li>';
+      }
+      document.getElementById('top-artists-page-number').textContent = topArtistsPage;
+    }
+    
+    // Fetch and display top albums.
+    async function displayTopAlbums() {
+      const interval = document.getElementById('top-albums-interval').value;
+      const data = await fetchLastfmData('user.gettopalbums', { period: interval, limit: 6, page: topAlbumsPage });
+      const topAlbumsList = document.getElementById('top-albums-list');
+      if (data && data.topalbums && data.topalbums.album) {
+        topAlbumsList.innerHTML = data.topalbums.album.map(album => createAlbumListItem(album)).join('');
+      } else {
+        topAlbumsList.innerHTML = '<li>Loading...</li>';
+      }
+      document.getElementById('top-albums-page-number').textContent = topAlbumsPage;
+    }
+    
+    // Update all sections.
     function updatePage() {
       displayNowPlaying();
       displayRecentTracks();
-      displayTopTracks();
+      displayTopSongs();
+      displayTopArtists();
+      displayTopAlbums();
     }
-
-    // Initial page load
+    
+    // Event listeners for interval selectors.
+    document.getElementById('top-songs-interval').addEventListener('change', () => {
+      topSongsPage = 1;
+      displayTopSongs();
+    });
+    document.getElementById('top-artists-interval').addEventListener('change', () => {
+      topArtistsPage = 1;
+      displayTopArtists();
+    });
+    document.getElementById('top-albums-interval').addEventListener('change', () => {
+      topAlbumsPage = 1;
+      displayTopAlbums();
+    });
+    
+    // Event listeners for pagination controls.
+    document.getElementById('top-songs-prev').addEventListener('click', () => {
+      if(topSongsPage > 1) { topSongsPage--; displayTopSongs(); }
+    });
+    document.getElementById('top-songs-next').addEventListener('click', () => {
+      topSongsPage++; displayTopSongs();
+    });
+    
+    document.getElementById('top-artists-prev').addEventListener('click', () => {
+      if(topArtistsPage > 1) { topArtistsPage--; displayTopArtists(); }
+    });
+    document.getElementById('top-artists-next').addEventListener('click', () => {
+      topArtistsPage++; displayTopArtists();
+    });
+    
+    document.getElementById('top-albums-prev').addEventListener('click', () => {
+      if(topAlbumsPage > 1) { topAlbumsPage--; displayTopAlbums(); }
+    });
+    document.getElementById('top-albums-next').addEventListener('click', () => {
+      topAlbumsPage++; displayTopAlbums();
+    });
+    
+    // Initial load and update every 10 seconds.
     updatePage();
-    // Refresh data every 10 seconds
     setInterval(updatePage, 10000);
   </script>
 </body>
