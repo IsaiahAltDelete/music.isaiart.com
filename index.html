@@ -114,7 +114,8 @@
       width: 0%;
       height: 100%;
       background: var(--accent-color);
-      transition: width 1s linear;
+      /* Using a cubic-bezier for a slight bounce effect */
+      transition: width 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
     .player-controls {
       display: flex;
@@ -418,6 +419,10 @@
     let currentTrack = null;
     let progressInterval;
     
+    // Variables to store the current track’s start time and duration (in seconds)
+    let currentTrackStartTime = null;
+    let currentTrackDuration = null;
+    
     // Pagination state for top sections.
     let topSongsPage = 1, topArtistsPage = 1, topAlbumsPage = 1;
     
@@ -441,7 +446,7 @@
       }
     }
     
-    // Modified to check if the image is empty; if so, return a placeholder with "No Image" text.
+    // Returns album art URL if available, otherwise a placeholder.
     function getAlbumArtUrl(images, size = 'extralarge') {
       const image = images.find(img => img.size === size);
       if (image && image['#text']) {
@@ -472,17 +477,40 @@
       return `${days} days ago`;
     }
     
-    // Update Now Playing Section
+    // Update Now Playing Section and (if duration is provided) start live progress updates.
     function updateNowPlaying(track) {
       const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
       document.querySelector('.album-art').src = albumArtUrl;
       document.getElementById('track-title').textContent = track.name;
       document.getElementById('track-artist').textContent = track.artist['#text'];
       setBackgroundImage(albumArtUrl);
+      
+      // If the track is now playing and duration is provided, start progress updates.
+      if (track['@attr'] && track['@attr'].nowplaying && track.duration) {
+        currentTrackDuration = parseInt(track.duration); // in seconds
+        currentTrackStartTime = Date.now();
+        updateProgressBar();
+      } else {
+        // Otherwise, reset progress bar.
+        document.querySelector('.progress').style.width = '0%';
+        currentTrackDuration = null;
+        currentTrackStartTime = null;
+      }
+    }
+    
+    // Continuously update the progress bar if we have duration information.
+    function updateProgressBar() {
+      if (currentTrack && currentTrack['@attr'] && currentTrack['@attr'].nowplaying && currentTrackDuration && currentTrackStartTime) {
+        const elapsed = (Date.now() - currentTrackStartTime) / 1000; // in seconds
+        const percentage = Math.min(100, (elapsed / currentTrackDuration) * 100);
+        document.querySelector('.progress').style.width = percentage + '%';
+        if (percentage < 100) {
+          requestAnimationFrame(updateProgressBar);
+        }
+      }
     }
     
     // Create HTML for a track list item.
-    // For top songs, if available, use the track’s album art cover.
     function createTrackListItem(track, extraInfo = '') {
       const albumArtUrl = getAlbumArtUrl(track.image, 'small');
       const playTime = track.date ? formatPlayTime(track.date.uts) : '';
@@ -524,17 +552,7 @@
     }
     
     function startProgressBar() {
-      const progress = document.querySelector('.progress');
-      let width = 0;
-      clearInterval(progressInterval);
-      progress.style.width = '0%';
-      progressInterval = setInterval(() => {
-        if (width >= 100) clearInterval(progressInterval);
-        else {
-          width++;
-          progress.style.width = width + '%';
-        }
-      }, 3000); // Adjust timing as needed
+      // The progress bar update is now driven by updateProgressBar() if the song duration is available.
     }
     
     // Fetch and display now playing track.
@@ -545,7 +563,6 @@
         if (JSON.stringify(track) !== JSON.stringify(currentTrack)) {
           currentTrack = track;
           updateNowPlaying(track);
-          startProgressBar();
         }
       }
     }
