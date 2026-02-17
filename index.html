@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Visual History Player</title>
   
   <!-- Tailwind CSS -->
@@ -14,10 +14,7 @@
   <!-- Google Font: Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Color Thief Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-
-  <!-- Custom Config & Styles -->
+  <!-- Tailwind Config -->
   <script>
     tailwind.config = {
       theme: {
@@ -26,23 +23,17 @@
             sans: ['Poppins', 'sans-serif'],
           },
           colors: {
-            glass: 'rgba(255, 255, 255, 0.08)',
-            glassHover: 'rgba(255, 255, 255, 0.15)',
             spotify: '#1DB954',
+            glass: 'rgba(20, 20, 20, 0.6)',
+            dark: '#121212',
           },
           animation: {
-            'spin-slow': 'spin 12s linear infinite',
-            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'spin-slow': 'spin 8s linear infinite',
             'fade-in': 'fadeIn 0.5s ease-out forwards',
-            'slide-up': 'slideUp 0.5s ease-out forwards',
           },
           keyframes: {
             fadeIn: {
-              '0%': { opacity: '0' },
-              '100%': { opacity: '1' },
-            },
-            slideUp: {
-              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
             }
           }
@@ -54,7 +45,7 @@
   <style>
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
-      width: 6px;
+      width: 4px;
     }
     ::-webkit-scrollbar-track {
       background: transparent; 
@@ -67,127 +58,146 @@
       background: rgba(255, 255, 255, 0.4); 
     }
 
-    /* Hide default select arrow */
     select {
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
     }
     
-    /* Smooth image transitions */
     #bg-image {
       transition: background-image 1s ease-in-out;
     }
-    
+
     .glass-panel {
-      background: rgba(20, 20, 20, 0.6);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      background: rgba(18, 18, 18, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
-<body class="bg-black text-white h-screen w-full overflow-hidden flex items-center justify-center relative selection:bg-spotify selection:text-white">
+<body class="bg-black text-white h-[100dvh] w-screen overflow-hidden flex items-center justify-center relative selection:bg-spotify selection:text-white">
 
   <!-- Dynamic Background Layer -->
-  <div id="bg-image" class="absolute inset-0 bg-cover bg-center z-0 opacity-40 scale-110"></div>
-  <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent z-0"></div>
+  <div id="bg-image" class="absolute inset-0 bg-cover bg-center z-0 opacity-50 scale-110 blur-[60px]"></div>
+  <div class="absolute inset-0 bg-black/40 z-0"></div>
 
-  <!-- Main Container -->
-  <div class="relative z-10 w-full h-full max-w-7xl mx-auto p-4 md:p-8 flex flex-col md:flex-row gap-6">
+  <!-- Main Layout Container -->
+  <div class="relative z-10 w-full h-full max-w-7xl mx-auto p-4 md:p-8 flex flex-col md:flex-row gap-4 md:gap-6 overflow-hidden">
     
-    <!-- Left Panel: Now Playing / Hero -->
-    <div class="w-full md:w-5/12 lg:w-4/12 flex flex-col justify-center items-center glass-panel rounded-3xl p-8 animate-slide-up">
+    <!-- LEFT PANEL: Now Playing -->
+    <div class="w-full md:w-5/12 lg:w-4/12 flex-shrink-0 flex flex-col justify-center items-center glass-panel rounded-3xl p-6 md:p-8 transition-all duration-500">
       
-      <!-- Album Art -->
-      <div class="relative group w-64 h-64 md:w-80 md:h-80 mb-8">
-        <div class="absolute inset-0 bg-white/20 rounded-full blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
-        <img id="album-art" src="https://via.placeholder.com/300" alt="Album Art" class="w-full h-full object-cover rounded-2xl shadow-2xl shadow-black/50 transform transition-transform duration-500 group-hover:scale-[1.02]" crossorigin="anonymous">
-      </div>
-
-      <!-- Track Info -->
-      <div class="text-center w-full space-y-2 mb-6">
-        <h1 id="track-title" class="text-2xl md:text-3xl font-bold tracking-tight truncate px-2 drop-shadow-lg">Track Title</h1>
-        <h3 id="track-artist" class="text-lg text-gray-300 font-medium truncate px-2">Artist Name</h3>
-      </div>
-
-      <!-- Progress Bar -->
-      <div class="w-full max-w-xs mb-8 group">
-        <div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-          <div class="progress h-full bg-spotify w-0 shadow-[0_0_10px_rgba(29,185,84,0.7)] transition-all duration-[3000ms] ease-linear"></div>
+      <!-- Spinning Record Container -->
+      <div class="relative group w-56 h-56 md:w-80 md:h-80 mb-6 md:mb-10 flex-shrink-0">
+        <!-- Glow behind -->
+        <div class="absolute inset-0 bg-white/10 rounded-full blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500"></div>
+        
+        <!-- The Record Image -->
+        <img id="album-art" src="https://via.placeholder.com/300" alt="Album Art" class="w-full h-full object-cover rounded-full shadow-[0_0_30px_rgba(0,0,0,0.6)] animate-spin-slow group-hover:pause border-4 border-black/20" crossorigin="anonymous">
+        
+        <!-- Vinyl Center Hole -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="w-4 h-4 md:w-6 md:h-6 bg-[#121212] rounded-full border border-gray-700 shadow-inner"></div>
         </div>
       </div>
 
-      <!-- Controls (Visual Only) -->
-      <div class="flex items-center gap-8">
-        <button id="prev-btn" class="text-gray-400 hover:text-white transition-colors transform hover:scale-110">
-          <span class="material-icons text-4xl">skip_previous</span>
+      <!-- Track Info -->
+      <div class="text-center w-full space-y-1 md:space-y-2 mb-4 md:mb-6">
+        <h1 id="track-title" class="text-xl md:text-2xl font-bold tracking-tight truncate px-2 drop-shadow-md">Loading...</h1>
+        <h3 id="track-artist" class="text-sm md:text-lg text-gray-300 font-medium truncate px-2">Please wait</h3>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full max-w-xs mb-4 md:mb-8 group">
+        <div class="flex justify-between text-[10px] text-gray-400 mb-1 px-1">
+          <span>0:00</span>
+          <span>LIVE</span>
+        </div>
+        <div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+          <div class="progress h-full bg-spotify w-0 shadow-[0_0_10px_rgba(29,185,84,0.7)] transition-all duration-[1000ms] ease-linear"></div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-6 md:gap-8">
+        <button class="text-gray-400 hover:text-white transition-colors transform hover:scale-110 active:scale-95">
+          <span class="material-icons text-3xl md:text-4xl">skip_previous</span>
         </button>
-        <button id="play-btn" class="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 hover:bg-spotify hover:text-white transition-all duration-300 shadow-lg shadow-white/10">
-          <span class="material-icons text-4xl ml-1">play_arrow</span>
+        <button class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 hover:bg-spotify hover:text-white transition-all duration-300 shadow-lg shadow-white/10 active:scale-95">
+          <span class="material-icons text-3xl md:text-4xl ml-1">play_arrow</span>
         </button>
-        <button id="next-btn" class="text-gray-400 hover:text-white transition-colors transform hover:scale-110">
-          <span class="material-icons text-4xl">skip_next</span>
+        <button class="text-gray-400 hover:text-white transition-colors transform hover:scale-110 active:scale-95">
+          <span class="material-icons text-3xl md:text-4xl">skip_next</span>
         </button>
       </div>
     </div>
 
-    <!-- Right Panel: Stats & History -->
-    <div class="w-full md:w-7/12 lg:w-8/12 glass-panel rounded-3xl flex flex-col overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
+    <!-- RIGHT PANEL: Stats & History -->
+    <div class="w-full md:w-7/12 lg:w-8/12 glass-panel rounded-3xl flex flex-col overflow-hidden flex-grow h-full">
       
       <!-- Navigation Tabs -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/20">
-        <div class="flex gap-1 md:gap-2 overflow-x-auto no-scrollbar">
-          <button id="tab-recent-btn" class="tab-btn active px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 bg-white/10 text-white border border-white/5">
-            <span class="material-icons text-lg">history</span> <span class="hidden sm:inline">Recent</span>
+      <div class="flex-shrink-0 flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-white/10 bg-black/20 z-30 relative">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar w-full">
+          <button id="tab-recent-btn" onclick="switchTab('recent')" class="tab-btn active whitespace-nowrap px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-300 flex items-center gap-2 bg-white/10 text-white border border-white/5">
+            <span class="material-icons text-sm md:text-lg">history</span> Recent
           </button>
-          <button id="tab-albums-btn" class="tab-btn px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-300 flex items-center gap-2 border border-transparent">
-            <span class="material-icons text-lg">album</span> <span class="hidden sm:inline">Albums</span>
+          <button id="tab-albums-btn" onclick="switchTab('albums')" class="tab-btn whitespace-nowrap px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-300 flex items-center gap-2 border border-transparent">
+            <span class="material-icons text-sm md:text-lg">album</span> Albums
           </button>
-          <button id="tab-artists-btn" class="tab-btn px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-300 flex items-center gap-2 border border-transparent">
-            <span class="material-icons text-lg">person</span> <span class="hidden sm:inline">Artists</span>
+          <button id="tab-artists-btn" onclick="switchTab('artists')" class="tab-btn whitespace-nowrap px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-300 flex items-center gap-2 border border-transparent">
+            <span class="material-icons text-sm md:text-lg">person</span> Artists
           </button>
-          <button id="tab-songs-btn" class="tab-btn px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-300 flex items-center gap-2 border border-transparent">
-            <span class="material-icons text-lg">music_note</span> <span class="hidden sm:inline">Songs</span>
+          <button id="tab-songs-btn" onclick="switchTab('songs')" class="tab-btn whitespace-nowrap px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-300 flex items-center gap-2 border border-transparent">
+            <span class="material-icons text-sm md:text-lg">music_note</span> Songs
           </button>
         </div>
       </div>
 
       <!-- Content Area -->
-      <div class="flex-1 overflow-y-auto p-4 md:p-6 relative">
+      <!-- Removed padding from parent container to fix gap issue -->
+      <div class="flex-1 overflow-y-auto relative scroll-smooth">
         
         <!-- Tab: Recently Played -->
         <div id="tab-recent" class="tab-content block animate-fade-in">
-          <header class="flex justify-between items-end mb-6">
-            <h2 class="text-2xl font-bold">Recently Played</h2>
-            <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Live History</span>
+          <!-- Sticky Header: Added padding here instead of parent -->
+          <header class="flex justify-between items-center sticky top-0 z-20 bg-[#121212]/90 backdrop-blur-xl px-4 md:px-6 py-4 mb-2 border-b border-white/5 shadow-lg transition-all">
+            <h2 class="text-xl md:text-2xl font-bold drop-shadow-sm">Recently Played</h2>
+            <span class="text-[10px] md:text-xs text-spotify uppercase tracking-wider font-bold bg-spotify/10 px-2 py-1 rounded border border-spotify/20">Live</span>
           </header>
-          <ul id="recent-tracks-list" class="space-y-2">
-            <!-- JS Injected -->
-            <li class="text-gray-500 animate-pulse">Loading history...</li>
+          <!-- List: Added padding here -->
+          <ul id="recent-tracks-list" class="space-y-2 px-4 md:px-6 pb-6 pt-2">
+            <li class="text-gray-500 animate-pulse text-sm">Loading history...</li>
           </ul>
         </div>
 
         <!-- Tab: Top Albums -->
         <div id="tab-albums" class="tab-content hidden animate-fade-in">
-          <header class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">Top Albums</h2>
+          <header class="flex justify-between items-center sticky top-0 z-20 bg-[#121212]/90 backdrop-blur-xl px-4 md:px-6 py-4 mb-2 border-b border-white/5 shadow-lg transition-all">
+            <h2 class="text-xl md:text-2xl font-bold">Top Albums</h2>
             <div class="relative">
-              <select id="top-albums-interval" class="bg-white/10 text-white text-sm rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-1 focus:ring-spotify cursor-pointer hover:bg-white/20 transition-colors">
-                <option value="overall" class="bg-gray-900">All Time</option>
-                <option value="7day" class="bg-gray-900">7 Days</option>
-                <option value="1month" selected class="bg-gray-900">1 Month</option>
-                <option value="12month" class="bg-gray-900">1 Year</option>
+              <select id="top-albums-interval" class="bg-black/40 text-white text-xs md:text-sm rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-1 focus:ring-spotify cursor-pointer hover:bg-white/10 transition-colors border border-white/10">
+                <option value="overall">All Time</option>
+                <option value="7day">7 Days</option>
+                <option value="1month" selected>1 Month</option>
+                <option value="12month">1 Year</option>
               </select>
               <span class="material-icons absolute right-2 top-1.5 text-sm pointer-events-none text-gray-400">expand_more</span>
             </div>
           </header>
-          <ul id="top-albums-list" class="space-y-2">
-            <li class="text-gray-500 animate-pulse">Loading albums...</li>
+          <ul id="top-albums-list" class="space-y-2 px-4 md:px-6 pt-2">
+            <li class="text-gray-500 animate-pulse text-sm">Loading albums...</li>
           </ul>
-          <!-- Pagination -->
-          <div class="flex justify-end items-center gap-4 mt-6 pt-4 border-t border-white/10">
+          <div class="flex justify-center md:justify-end items-center gap-4 mt-6 pt-4 border-t border-white/10 pb-6 px-4 md:px-6">
             <button id="top-albums-prev" class="w-8 h-8 rounded-full bg-white/5 hover:bg-spotify hover:text-white flex items-center justify-center transition-colors"><span class="material-icons text-lg">chevron_left</span></button>
             <span id="top-albums-page-number" class="text-sm font-mono text-gray-400">1</span>
             <button id="top-albums-next" class="w-8 h-8 rounded-full bg-white/5 hover:bg-spotify hover:text-white flex items-center justify-center transition-colors"><span class="material-icons text-lg">chevron_right</span></button>
@@ -196,22 +206,22 @@
 
         <!-- Tab: Top Artists -->
         <div id="tab-artists" class="tab-content hidden animate-fade-in">
-          <header class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">Top Artists</h2>
+          <header class="flex justify-between items-center sticky top-0 z-20 bg-[#121212]/90 backdrop-blur-xl px-4 md:px-6 py-4 mb-2 border-b border-white/5 shadow-lg transition-all">
+            <h2 class="text-xl md:text-2xl font-bold">Top Artists</h2>
             <div class="relative">
-              <select id="top-artists-interval" class="bg-white/10 text-white text-sm rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-1 focus:ring-spotify cursor-pointer hover:bg-white/20 transition-colors">
-                <option value="overall" class="bg-gray-900">All Time</option>
-                <option value="7day" class="bg-gray-900">7 Days</option>
-                <option value="1month" selected class="bg-gray-900">1 Month</option>
-                <option value="12month" class="bg-gray-900">1 Year</option>
+              <select id="top-artists-interval" class="bg-black/40 text-white text-xs md:text-sm rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-1 focus:ring-spotify cursor-pointer hover:bg-white/10 transition-colors border border-white/10">
+                <option value="overall">All Time</option>
+                <option value="7day">7 Days</option>
+                <option value="1month" selected>1 Month</option>
+                <option value="12month">1 Year</option>
               </select>
               <span class="material-icons absolute right-2 top-1.5 text-sm pointer-events-none text-gray-400">expand_more</span>
             </div>
           </header>
-          <ul id="top-artists-list" class="space-y-2">
-            <li class="text-gray-500 animate-pulse">Loading artists...</li>
+          <ul id="top-artists-list" class="space-y-2 px-4 md:px-6 pt-2">
+            <li class="text-gray-500 animate-pulse text-sm">Loading artists...</li>
           </ul>
-          <div class="flex justify-end items-center gap-4 mt-6 pt-4 border-t border-white/10">
+          <div class="flex justify-center md:justify-end items-center gap-4 mt-6 pt-4 border-t border-white/10 pb-6 px-4 md:px-6">
             <button id="top-artists-prev" class="w-8 h-8 rounded-full bg-white/5 hover:bg-spotify hover:text-white flex items-center justify-center transition-colors"><span class="material-icons text-lg">chevron_left</span></button>
             <span id="top-artists-page-number" class="text-sm font-mono text-gray-400">1</span>
             <button id="top-artists-next" class="w-8 h-8 rounded-full bg-white/5 hover:bg-spotify hover:text-white flex items-center justify-center transition-colors"><span class="material-icons text-lg">chevron_right</span></button>
@@ -220,22 +230,22 @@
 
         <!-- Tab: Top Songs -->
         <div id="tab-songs" class="tab-content hidden animate-fade-in">
-          <header class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">Top Songs</h2>
+          <header class="flex justify-between items-center sticky top-0 z-20 bg-[#121212]/90 backdrop-blur-xl px-4 md:px-6 py-4 mb-2 border-b border-white/5 shadow-lg transition-all">
+            <h2 class="text-xl md:text-2xl font-bold">Top Songs</h2>
             <div class="relative">
-              <select id="top-songs-interval" class="bg-white/10 text-white text-sm rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-1 focus:ring-spotify cursor-pointer hover:bg-white/20 transition-colors">
-                <option value="overall" class="bg-gray-900">All Time</option>
-                <option value="7day" class="bg-gray-900">7 Days</option>
-                <option value="1month" selected class="bg-gray-900">1 Month</option>
-                <option value="12month" class="bg-gray-900">1 Year</option>
+              <select id="top-songs-interval" class="bg-black/40 text-white text-xs md:text-sm rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-1 focus:ring-spotify cursor-pointer hover:bg-white/10 transition-colors border border-white/10">
+                <option value="overall">All Time</option>
+                <option value="7day">7 Days</option>
+                <option value="1month" selected>1 Month</option>
+                <option value="12month">1 Year</option>
               </select>
               <span class="material-icons absolute right-2 top-1.5 text-sm pointer-events-none text-gray-400">expand_more</span>
             </div>
           </header>
-          <ul id="top-songs-list" class="space-y-2">
-            <li class="text-gray-500 animate-pulse">Loading songs...</li>
+          <ul id="top-songs-list" class="space-y-2 px-4 md:px-6 pt-2">
+            <li class="text-gray-500 animate-pulse text-sm">Loading songs...</li>
           </ul>
-          <div class="flex justify-end items-center gap-4 mt-6 pt-4 border-t border-white/10">
+          <div class="flex justify-center md:justify-end items-center gap-4 mt-6 pt-4 border-t border-white/10 pb-6 px-4 md:px-6">
             <button id="top-songs-prev" class="w-8 h-8 rounded-full bg-white/5 hover:bg-spotify hover:text-white flex items-center justify-center transition-colors"><span class="material-icons text-lg">chevron_left</span></button>
             <span id="top-songs-page-number" class="text-sm font-mono text-gray-400">1</span>
             <button id="top-songs-next" class="w-8 h-8 rounded-full bg-white/5 hover:bg-spotify hover:text-white flex items-center justify-center transition-colors"><span class="material-icons text-lg">chevron_right</span></button>
@@ -248,11 +258,9 @@
 
   <script>
     // --- CONFIGURATION ---
-    // Replace with your actual Last.fm API key
-    const API_KEY = 'YOUR_LASTFM_API_KEY_HERE'; 
+    const API_KEY = 'b25b959554ed76058ac220b7b2e0a026'; 
     const USERNAME = 'Isaiart';
     
-    const colorThief = new ColorThief();
     let currentTrack = null;
     let progressInterval;
     
@@ -281,19 +289,24 @@
     
     // --- UTILS ---
     function getAlbumArtUrl(images, size = 'extralarge') {
-      if (!images) return 'https://via.placeholder.com/300?text=No+Image';
+      if (!images || !Array.isArray(images)) return 'https://via.placeholder.com/300?text=No+Image';
       const image = images.find(img => img.size === size);
       if (image && image['#text']) {
         return image['#text'];
-      } else {
-        // Fallback to largest available if requested size missing
-        return images[images.length - 1]['#text'] || 'https://via.placeholder.com/300?text=No+Image';
       }
+      const largest = images[images.length - 1];
+      if (largest && largest['#text']) return largest['#text'];
+      return 'https://via.placeholder.com/300?text=No+Image';
     }
     
     function setBackgroundImage(url) {
       const bg = document.getElementById('bg-image');
-      bg.style.backgroundImage = `url(${url})`;
+      if(url && !url.includes('placeholder')) {
+        bg.style.backgroundImage = `url(${url})`;
+      } else {
+        bg.style.backgroundImage = 'none';
+        bg.style.backgroundColor = '#121212';
+      }
     }
     
     function formatPlayTime(timestamp) {
@@ -319,7 +332,6 @@
       const albumArtUrl = getAlbumArtUrl(track.image, 'extralarge');
       const imgElement = document.getElementById('album-art');
       
-      // Only update DOM if src changes to prevent flickering
       if (imgElement.src !== albumArtUrl) {
         imgElement.src = albumArtUrl;
         setBackgroundImage(albumArtUrl);
@@ -329,19 +341,20 @@
       document.getElementById('track-artist').textContent = track.artist['#text'];
     }
     
-    // Template for Track List Item (Tailwind styled)
     function createTrackListItem(track, extraInfo = '', isNowPlaying = false) {
-      const albumArtUrl = getAlbumArtUrl(track.image, 'medium'); // Use medium for list
-      const playTime = isNowPlaying ? '<span class="text-spotify font-bold animate-pulse">Now Playing</span>' : (track.date ? formatPlayTime(track.date.uts) : '');
+      const albumArtUrl = getAlbumArtUrl(track.image, 'medium');
+      const playTime = isNowPlaying 
+        ? '<span class="text-spotify font-bold animate-pulse flex items-center gap-1"><span class="material-icons text-sm">equalizer</span> Now Playing</span>' 
+        : (track.date ? formatPlayTime(track.date.uts) : '');
       
       return `
-        <li class="group flex items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
-          <img src="${albumArtUrl}" alt="Art" class="w-12 h-12 rounded-lg object-cover shadow-md mr-4 group-hover:scale-105 transition-transform">
+        <li class="group flex items-center p-2 md:p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
+          <img src="${albumArtUrl}" alt="Art" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover shadow-md mr-3 md:mr-4 group-hover:scale-105 transition-transform bg-gray-800">
           <div class="flex-1 min-w-0">
             <div class="font-semibold text-white truncate text-sm md:text-base">${track.name}</div>
             <div class="text-xs md:text-sm text-gray-400 truncate group-hover:text-gray-300">${track.artist['#text'] || track.artist.name}</div>
           </div>
-          <div class="text-xs text-gray-500 font-medium ml-2 text-right whitespace-nowrap">
+          <div class="text-[10px] md:text-xs text-gray-500 font-medium ml-2 text-right whitespace-nowrap">
             ${extraInfo ? `<span class="block text-gray-400">${extraInfo}</span>` : ''}
             ${playTime}
           </div>
@@ -349,38 +362,33 @@
       `;
     }
     
-    // Template for Artist List Item
     function createArtistListItem(artist, rank) {
-      // Last.fm artist images are often missing in API, using placeholder or generic icon if needed
       const imageUrl = artist.image ? getAlbumArtUrl(artist.image, 'medium') : 'https://via.placeholder.com/64?text=Artist';
-      
       return `
-        <li class="group flex items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
-          <div class="w-8 text-center text-gray-500 font-bold mr-2 text-sm">#${rank}</div>
+        <li class="group flex items-center p-2 md:p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
+          <div class="w-6 md:w-8 text-center text-gray-500 font-bold mr-2 text-xs md:text-sm">#${rank}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-bold text-white truncate text-base">${artist.name}</div>
+            <div class="font-bold text-white truncate text-sm md:text-base">${artist.name}</div>
             <div class="text-xs text-spotify font-medium">${parseInt(artist.playcount).toLocaleString()} plays</div>
           </div>
           <a href="${artist.url}" target="_blank" class="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white">
-            <span class="material-icons text-lg">open_in_new</span>
+            <span class="material-icons text-base md:text-lg">open_in_new</span>
           </a>
         </li>
       `;
     }
     
-    // Template for Album List Item
     function createAlbumListItem(album, rank) {
       const albumArtUrl = album.image ? getAlbumArtUrl(album.image, 'medium') : 'https://via.placeholder.com/64?text=Album';
-      
       return `
-        <li class="group flex items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
-          <div class="w-6 text-center text-gray-500 font-bold mr-2 text-xs">#${rank}</div>
-          <img src="${albumArtUrl}" alt="Art" class="w-12 h-12 rounded-lg object-cover shadow-md mr-4 group-hover:scale-105 transition-transform">
+        <li class="group flex items-center p-2 md:p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
+          <div class="w-6 text-center text-gray-500 font-bold mr-2 text-xs md:text-sm">#${rank}</div>
+          <img src="${albumArtUrl}" alt="Art" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover shadow-md mr-3 md:mr-4 group-hover:scale-105 transition-transform bg-gray-800">
           <div class="flex-1 min-w-0">
             <div class="font-semibold text-white truncate text-sm md:text-base">${album.name}</div>
             <div class="text-xs text-gray-400 truncate">${album.artist.name}</div>
           </div>
-          <div class="text-xs text-gray-500 font-medium ml-2">
+          <div class="text-[10px] md:text-xs text-gray-500 font-medium ml-2">
             ${parseInt(album.playcount).toLocaleString()} plays
           </div>
         </li>
@@ -392,24 +400,21 @@
       let width = 0;
       clearInterval(progressInterval);
       progress.style.width = '0%';
-      // Fake progress bar simulation
       progressInterval = setInterval(() => {
         if (width >= 100) {
-            width = 0; // Loop it for visual effect since we don't have real duration
+            width = 0; 
         } else {
-          width += 0.5;
+          width += 0.2;
           progress.style.width = width + '%';
         }
-      }, 1000); 
+      }, 200); 
     }
     
-    // --- DATA FETCHING FUNCTIONS ---
-
+    // --- DATA FETCHING ---
     async function displayNowPlaying() {
       const data = await fetchLastfmData('user.getrecenttracks', { limit: 1 });
       if (data && data.recenttracks && data.recenttracks.track && data.recenttracks.track[0]) {
         const track = data.recenttracks.track[0];
-        // Check if track changed to avoid unnecessary DOM updates
         if (!currentTrack || track.name !== currentTrack.name) {
           currentTrack = track;
           updateNowPlaying(track);
@@ -419,17 +424,16 @@
     }
     
     async function displayRecentTracks() {
-      const data = await fetchLastfmData('user.getrecenttracks', { limit: 15 });
+      const data = await fetchLastfmData('user.getrecenttracks', { limit: 20 });
       const list = document.getElementById('recent-tracks-list');
       if (data && data.recenttracks && data.recenttracks.track) {
         const tracks = data.recenttracks.track;
-        // Map tracks to HTML. Note: The first track might be "now playing"
         list.innerHTML = tracks.map(track => {
             const isNowPlaying = track['@attr'] && track['@attr'].nowplaying === 'true';
             return createTrackListItem(track, '', isNowPlaying);
         }).join('');
       } else {
-        list.innerHTML = '<li class="p-4 text-center text-gray-500">Could not load tracks.</li>';
+        list.innerHTML = '<li class="p-4 text-center text-gray-500 text-sm">Could not load tracks. Check API Key.</li>';
       }
     }
     
@@ -442,7 +446,7 @@
             createTrackListItem(track, `${parseInt(track.playcount).toLocaleString()} plays`)
         ).join('');
       } else {
-        list.innerHTML = '<li class="p-4 text-center text-gray-500">No data available.</li>';
+        list.innerHTML = '<li class="p-4 text-center text-gray-500 text-sm">No data available.</li>';
       }
       document.getElementById('top-songs-page-number').textContent = topSongsPage;
     }
@@ -456,7 +460,7 @@
             createArtistListItem(artist, (topArtistsPage - 1) * 10 + index + 1)
         ).join('');
       } else {
-        list.innerHTML = '<li class="p-4 text-center text-gray-500">No data available.</li>';
+        list.innerHTML = '<li class="p-4 text-center text-gray-500 text-sm">No data available.</li>';
       }
       document.getElementById('top-artists-page-number').textContent = topArtistsPage;
     }
@@ -470,29 +474,28 @@
             createAlbumListItem(album, (topAlbumsPage - 1) * 10 + index + 1)
         ).join('');
       } else {
-        list.innerHTML = '<li class="p-4 text-center text-gray-500">No data available.</li>';
+        list.innerHTML = '<li class="p-4 text-center text-gray-500 text-sm">No data available.</li>';
       }
       document.getElementById('top-albums-page-number').textContent = topAlbumsPage;
     }
     
     function updatePage() {
       displayNowPlaying();
-      // Only update the active tab to save API calls
-      const activeTabId = document.querySelector('.tab-content.block').id;
-      if (activeTabId === 'tab-recent') displayRecentTracks();
-      else if (activeTabId === 'tab-albums') displayTopAlbums();
-      else if (activeTabId === 'tab-artists') displayTopArtists();
-      else if (activeTabId === 'tab-songs') displayTopSongs();
+      const activeTab = document.querySelector('.tab-content.block');
+      if (activeTab) {
+        const activeTabId = activeTab.id;
+        if (activeTabId === 'tab-recent') displayRecentTracks();
+        else if (activeTabId === 'tab-albums') displayTopAlbums();
+        else if (activeTabId === 'tab-artists') displayTopArtists();
+        else if (activeTabId === 'tab-songs') displayTopSongs();
+      }
     }
     
     // --- EVENT LISTENERS ---
-    
-    // Interval Selectors
     document.getElementById('top-songs-interval').addEventListener('change', () => { topSongsPage = 1; displayTopSongs(); });
     document.getElementById('top-artists-interval').addEventListener('change', () => { topArtistsPage = 1; displayTopArtists(); });
     document.getElementById('top-albums-interval').addEventListener('change', () => { topAlbumsPage = 1; displayTopAlbums(); });
     
-    // Pagination
     document.getElementById('top-songs-prev').addEventListener('click', () => { if(topSongsPage > 1) { topSongsPage--; displayTopSongs(); }});
     document.getElementById('top-songs-next').addEventListener('click', () => { topSongsPage++; displayTopSongs(); });
     
@@ -502,7 +505,6 @@
     document.getElementById('top-albums-prev').addEventListener('click', () => { if(topAlbumsPage > 1) { topAlbumsPage--; displayTopAlbums(); }});
     document.getElementById('top-albums-next').addEventListener('click', () => { topAlbumsPage++; displayTopAlbums(); });
     
-    // Tab Navigation Logic
     const tabs = {
       recent: document.getElementById('tab-recent'),
       albums: document.getElementById('tab-albums'),
@@ -516,44 +518,29 @@
       songs: document.getElementById('tab-songs-btn')
     };
     
-    function switchTab(tabName) {
-      // Reset all tabs
+    window.switchTab = function(tabName) {
       Object.values(tabs).forEach(tab => {
         tab.classList.remove('block', 'animate-fade-in');
         tab.classList.add('hidden');
       });
-      
-      // Reset all buttons
       Object.values(tabButtons).forEach(btn => {
-        btn.classList.remove('bg-white/10', 'text-white', 'border-white/5');
+        btn.classList.remove('active', 'bg-white/10', 'text-white', 'border-white/5');
         btn.classList.add('text-gray-400', 'border-transparent');
       });
-      
-      // Activate selected
       tabs[tabName].classList.remove('hidden');
       tabs[tabName].classList.add('block', 'animate-fade-in');
-      
       tabButtons[tabName].classList.remove('text-gray-400', 'border-transparent');
-      tabButtons[tabName].classList.add('bg-white/10', 'text-white', 'border-white/5');
+      tabButtons[tabName].classList.add('active', 'bg-white/10', 'text-white', 'border-white/5');
       
-      // Trigger data fetch for the new tab
       if(tabName === 'recent') displayRecentTracks();
       if(tabName === 'albums') displayTopAlbums();
       if(tabName === 'artists') displayTopArtists();
       if(tabName === 'songs') displayTopSongs();
     }
     
-    tabButtons.recent.addEventListener('click', () => switchTab('recent'));
-    tabButtons.albums.addEventListener('click', () => switchTab('albums'));
-    tabButtons.artists.addEventListener('click', () => switchTab('artists'));
-    tabButtons.songs.addEventListener('click', () => switchTab('songs'));
-    
-    // --- INITIALIZATION ---
-    // Initial load
+    // --- INIT ---
     displayNowPlaying();
     displayRecentTracks();
-    
-    // Auto-refresh every 10 seconds
     setInterval(updatePage, 10000);
   </script>
 </body>
