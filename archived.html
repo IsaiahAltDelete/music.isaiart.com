@@ -442,9 +442,13 @@
     }
     
     // Modified to check if the image is empty; if so, return a placeholder with "No Image" text.
+    function escapeHTML(str) {
+      return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
     function getAlbumArtUrl(images, size = 'extralarge') {
       const image = images.find(img => img.size === size);
-      if (image && image['#text']) {
+      if (image && image['#text'] && /^https:\/\//i.test(image['#text'])) {
         return image['#text'];
       } else {
         return 'https://via.placeholder.com/300?text=No+Image';
@@ -452,7 +456,7 @@
     }
     
     function setBackgroundImage(url) {
-      document.getElementById('bg-image').style.backgroundImage = `url(${url})`;
+      document.getElementById('bg-image').style.backgroundImage = `url(${JSON.stringify(url)})`;
     }
     
     function formatPlayTime(timestamp) {
@@ -488,10 +492,10 @@
       const playTime = track.date ? formatPlayTime(track.date.uts) : '';
       return `
         <li>
-          <img src="${albumArtUrl}" alt="Album Art" class="mini-art">
+          <img src="${escapeHTML(albumArtUrl)}" alt="Album Art" class="mini-art">
           <div>
-            <strong>${track.name}</strong>
-            <small>${track.artist['#text'] || track.artist.name}${extraInfo ? ' • ' + extraInfo : ''} ${playTime}</small>
+            <strong>${escapeHTML(track.name)}</strong>
+            <small>${escapeHTML(track.artist['#text'] || track.artist.name)}${extraInfo ? ' • ' + escapeHTML(extraInfo) : ''} ${playTime}</small>
           </div>
         </li>
       `;
@@ -502,8 +506,8 @@
       return `
         <li>
           <div>
-            <strong>${artist.name}</strong>
-            <small>Plays: ${artist.playcount}</small>
+            <strong>${escapeHTML(artist.name)}</strong>
+            <small>Plays: ${escapeHTML(artist.playcount)}</small>
           </div>
         </li>
       `;
@@ -514,10 +518,10 @@
       const albumArtUrl = album.image && album.image.length ? getAlbumArtUrl(album.image, 'extralarge') : 'https://via.placeholder.com/300?text=No+Image';
       return `
         <li>
-          <img src="${albumArtUrl}" alt="Album Art" class="mini-art">
+          <img src="${escapeHTML(albumArtUrl)}" alt="Album Art" class="mini-art">
           <div>
-            <strong>${album.name}</strong>
-            <small>${album.artist.name}</small>
+            <strong>${escapeHTML(album.name)}</strong>
+            <small>${escapeHTML(album.artist.name)}</small>
           </div>
         </li>
       `;

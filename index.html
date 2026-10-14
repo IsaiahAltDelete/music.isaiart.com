@@ -288,21 +288,30 @@
     }
     
     // --- UTILS ---
+    function escapeHTML(str) {
+      return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function safeUrl(url, fallback = '#') {
+      return (typeof url === 'string' && /^https:\/\//i.test(url)) ? url : fallback;
+    }
+
     function getAlbumArtUrl(images, size = 'extralarge') {
-      if (!images || !Array.isArray(images)) return 'https://via.placeholder.com/300?text=No+Image';
+      const fallback = 'https://via.placeholder.com/300?text=No+Image';
+      if (!images || !Array.isArray(images)) return fallback;
       const image = images.find(img => img.size === size);
       if (image && image['#text']) {
-        return image['#text'];
+        return safeUrl(image['#text'], fallback);
       }
       const largest = images[images.length - 1];
-      if (largest && largest['#text']) return largest['#text'];
-      return 'https://via.placeholder.com/300?text=No+Image';
+      if (largest && largest['#text']) return safeUrl(largest['#text'], fallback);
+      return fallback;
     }
     
     function setBackgroundImage(url) {
       const bg = document.getElementById('bg-image');
       if(url && !url.includes('placeholder')) {
-        bg.style.backgroundImage = `url(${url})`;
+        bg.style.backgroundImage = `url(${JSON.stringify(url)})`;
       } else {
         bg.style.backgroundImage = 'none';
         bg.style.backgroundColor = '#121212';
@@ -349,13 +358,13 @@
       
       return `
         <li class="group flex items-center p-2 md:p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
-          <img src="${albumArtUrl}" alt="Art" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover shadow-md mr-3 md:mr-4 group-hover:scale-105 transition-transform bg-gray-800">
+          <img src="${escapeHTML(albumArtUrl)}" alt="Art" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover shadow-md mr-3 md:mr-4 group-hover:scale-105 transition-transform bg-gray-800">
           <div class="flex-1 min-w-0">
-            <div class="font-semibold text-white truncate text-sm md:text-base">${track.name}</div>
-            <div class="text-xs md:text-sm text-gray-400 truncate group-hover:text-gray-300">${track.artist['#text'] || track.artist.name}</div>
+            <div class="font-semibold text-white truncate text-sm md:text-base">${escapeHTML(track.name)}</div>
+            <div class="text-xs md:text-sm text-gray-400 truncate group-hover:text-gray-300">${escapeHTML(track.artist['#text'] || track.artist.name)}</div>
           </div>
           <div class="text-[10px] md:text-xs text-gray-500 font-medium ml-2 text-right whitespace-nowrap">
-            ${extraInfo ? `<span class="block text-gray-400">${extraInfo}</span>` : ''}
+            ${extraInfo ? `<span class="block text-gray-400">${escapeHTML(extraInfo)}</span>` : ''}
             ${playTime}
           </div>
         </li>
@@ -368,10 +377,10 @@
         <li class="group flex items-center p-2 md:p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
           <div class="w-6 md:w-8 text-center text-gray-500 font-bold mr-2 text-xs md:text-sm">#${rank}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-bold text-white truncate text-sm md:text-base">${artist.name}</div>
+            <div class="font-bold text-white truncate text-sm md:text-base">${escapeHTML(artist.name)}</div>
             <div class="text-xs text-spotify font-medium">${parseInt(artist.playcount).toLocaleString()} plays</div>
           </div>
-          <a href="${artist.url}" target="_blank" class="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white">
+          <a href="${escapeHTML(safeUrl(artist.url))}" target="_blank" rel="noopener noreferrer" class="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white">
             <span class="material-icons text-base md:text-lg">open_in_new</span>
           </a>
         </li>
@@ -383,10 +392,10 @@
       return `
         <li class="group flex items-center p-2 md:p-3 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-default border border-transparent hover:border-white/5">
           <div class="w-6 text-center text-gray-500 font-bold mr-2 text-xs md:text-sm">#${rank}</div>
-          <img src="${albumArtUrl}" alt="Art" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover shadow-md mr-3 md:mr-4 group-hover:scale-105 transition-transform bg-gray-800">
+          <img src="${escapeHTML(albumArtUrl)}" alt="Art" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover shadow-md mr-3 md:mr-4 group-hover:scale-105 transition-transform bg-gray-800">
           <div class="flex-1 min-w-0">
-            <div class="font-semibold text-white truncate text-sm md:text-base">${album.name}</div>
-            <div class="text-xs text-gray-400 truncate">${album.artist.name}</div>
+            <div class="font-semibold text-white truncate text-sm md:text-base">${escapeHTML(album.name)}</div>
+            <div class="text-xs text-gray-400 truncate">${escapeHTML(album.artist.name)}</div>
           </div>
           <div class="text-[10px] md:text-xs text-gray-500 font-medium ml-2">
             ${parseInt(album.playcount).toLocaleString()} plays
